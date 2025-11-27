@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>空靈鼓練習 App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #222 0, #111 40%, #000 100%);
+      color: #f5f5f5;
+      min-height: 100vh;
+    }
+
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ---- 左側 Sidebar ---- */
+    .sidebar {
+      width: 210px;
+      background: linear-gradient(180deg, #191919 0%, #101010 100%);
+      border-right: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px;
+      gap: 12px;
+    }
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .sidebar-sub {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 12px;
+    }
+    .nav-btn {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #ddd;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.05s;
+    }
+    .nav-btn span.icon {
+      font-size: 16px;
+    }
+    .nav-btn:hover {
+      background: rgba(255,255,255,0.04);
+    }
+    .nav-btn.active {
+      background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
+      color: #1a1a1a;
+      border-color: #f9e7af;
+      transform: translateX(1px);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 11px;
+      color: #666;
+    }
+
+    /* ---- 右側主畫面 ---- */
+    .main-area {
+      flex: 1;
+      padding: 18px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .header {
+      margin-bottom: 4px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    .page {
+      display: none;
+      flex: 1;
+      margin-top: 10px;
+    }
+    .page.active {
+      display: flex;
+    }
+
+    /* ---- Page1：演奏器 ---- */
+    .page-play {
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .drum-container {
+      position: relative;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #444 0, #222 40%, #111 100%);
+      box-shadow: 0 0 25px rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .pad {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      background: radial-gradient(circle at 30% 30%, #666 0, #333 60%, #222 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.06s ease-out, box-shadow 0.06s ease-out, background 0.1s;
+      user-select: none;
+    }
+
+    .pad span {
+      font-size: 22px;
+      font-weight: 600;
+      text-shadow: 0 0 4px rgba(0,0,0,0.8);
+    }
+
+    .pad.active {
+      transform: scale(1.08);
+      box-shadow: 0 0 16px rgba(255, 230, 180, 0.9);
+      background: radial-gradient(circle at 30% 30%, #f5d37a 0, #c98b35 60%, #7c4b15 100%);
+    }
+
+    .center-label {
+      position: absolute;
+      text-align: center;
+      font-size: 13px;
+      color: #ddd;
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .help-panel {
+      font-size: 13px;
+      color: #ddd;
+      text-align: center;
+      line-height: 1.6;
+      max-width: 520px;
+    }
+
+    .kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #666;
+      background: #222;
+      font-family: monospace;
+      font-size: 12px;
+      margin: 0 2px;
+    }
+
+    /* ---- Page2 / Page3 / Page4 預備版面 ---- */
+    .placeholder {
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.7;
+      max-width: 520px;
+      margin-top: 20px;
+    }
+    .placeholder-title {
+      font-size: 16px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .placeholder-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid #666;
+      margin-bottom: 8px;
+      color: #aaa;
+    }
+
+    .footer {
+      font-size: 11px;
+      color: #666;
+      margin-top: auto;
+      margin-bottom: 6px;
+      text-align: right;
+    }
+
+    @media (max-width: 900px) {
+      .app-shell {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+      }
+      .sidebar-footer {
+        display: none;
+      }
+      .nav-btn {
+        white-space: nowrap;
+      }
+      .main-area {
+        padding: 12px;
+      }
+      .drum-container {
+        width: 320px;
+        height: 320px;
+      }
+      .pad {
+        width: 58px;
+        height: 58px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- 左側選單 -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-title">空靈鼓練習 App</div>
+        <div class="sidebar-sub">選擇你要的模式</div>
+      </div>
+
+      <button class="nav-btn active" data-page="page-play">
+        <span class="icon">🥁</span> 空靈鼓演奏器
+      </button>
+      <button class="nav-btn" data-page="page-ear">
+        <span class="icon">👂</span> 聽寫練習
+      </button>
+      <button class="nav-btn" data-page="page-melody">
+        <span class="icon">🎵</span> 自動旋律
+      </button>
+      <button class="nav-btn" data-page="page-chord">
+        <span class="icon">🎹</span> 和弦伴奏器
+      </button>
+
+      <div class="sidebar-footer">
+        v0.2 正式結構版<br />
+        音檔路徑：assets/drums/drum_d/
+      </div>
+    </aside>
+
+    <!-- 右側主畫面 -->
+    <main class="main-area">
+      <div class="header">
+        <h1>空靈鼓練習 App</h1>
+        <div class="header-sub">
+          左側切換模式，目前「空靈鼓演奏器」已完成，音檔來自 D 調：assets/drums/drum_d/
+        </div>
+      </div>
+
+      <!-- Page 1：空靈鼓演奏器 -->
+      <section id="page-play" class="page page-play active">
+        <div class="drum-container" id="drum">
+          <div class="center-label" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
+            D 調空靈鼓<br />簡譜 1～7（單音自由彈奏）
+          </div>
+        </div>
+
+        <div class="help-panel">
+          <div>🔊 每個數字代表簡譜：1=D、2=E、3=F#、4=G、5=A、6=B、7=C#</div>
+          <div>🖱 滑鼠點選圓上的按鍵可以聽音階</div>
+          <div>⌨️ 鍵盤按 <span class="kbd">1</span>～<span class="kbd">7</span> 也可以直接發音</div>
+          <div>📂 目前音檔位置：<code>assets/drums/drum_d/drumLong_*.wav</code></div>
+        </div>
+      </section>
+
+      <!-- Page 2：聽寫練習（先放預備區） -->
+      <section id="page-ear" class="page">
+        <div class="placeholder">
+          <div class="placeholder-tag">下一步要做的</div>
+          <div class="placeholder-title">👂 聽寫練習（Melody Ear Training）</div>
+          <p>
+            這一頁之後會變成：<br />
+            ・按「出題」自動播放 2～4 個音的旋律<br />
+            ・你在鼓面上按出你聽到的簡譜<br />
+            ・系統告訴你「答對 / 答錯」，並顯示正確答案<br />
+            ・可以選擇難度：2 音、3 音、4 音、加上和弦題目等<br />
+          </p>
+        </div>
+      </section>
+
+      <!-- Page 3：自動旋律（先放預備區） -->
+      <section id="page-melody" class="page">
+        <div class="placeholder">
+          <div class="placeholder-tag">之後要加入</div>
+          <div class="placeholder-title">🎵 自動旋律生成（D 調手碟風格）</div>
+          <p>
+            這一頁之後會可以：<br />
+            ・按一個按鈕，系統自動彈一段 D 調空靈鼓旋律<br />
+            ・可以選擇風格：療癒 / 冥想 / 開朗 / 濃烈<br />
+            ・可以設定長度：4 音、8 音、16 音<br />
+          </p>
+        </div>
+      </section>
+
+      <!-- Page 4：和弦伴奏器（先放預備區） -->
+      <section id="page-chord" class="page">
+        <div class="placeholder">
+          <div class="placeholder-tag">進階功能</div>
+          <div class="placeholder-title">🎹 和弦伴奏器（Chord Progression）</div>
+          <p>
+            未來這個頁面會：<br />
+            ・讓你選擇常見和弦進行（I–V–vi–IV 等）<br />
+            ・循環播放你剛剛生成的空靈鼓和弦 wav<br />
+            ・你可以在「演奏器」那頁跟著一起彈旋律<br />
+          </p>
+        </div>
+      </section>
+
+      <div class="footer">
+        v0.2：已完成「圓形演奏器 + 左側選單 + 專案路徑規劃」。下一步要實作「聽寫練習」。
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // --- 左側選單：切換頁面 ---
+    const navButtons = document.querySelectorAll(".nav-btn");
+    const pages = document.querySelectorAll(".page");
+
+    function showPage(pageId) {
+      pages.forEach(p => {
+        p.classList.toggle("active", p.id === pageId);
+      });
+      navButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.page === pageId);
+      });
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const target = btn.dataset.page;
+        showPage(target);
+      });
+    });
+
+    // --- Page1：演奏器 ---
+
+    // 設定 7 個簡譜對應的音檔（已改成正式路徑）
+    const audioFiles = {
+      "1": "assets/drums/drum_d/drumLong_1.wav",
+      "2": "assets/drums/drum_d/drumLong_2.wav",
+      "3": "assets/drums/drum_d/drumLong_3.wav",
+      "4": "assets/drums/drum_d/drumLong_4.wav",
+      "5": "assets/drums/drum_d/drumLong_5.wav",
+      "6": "assets/drums/drum_d/drumLong_6.wav",
+      "7": "assets/drums/drum_d/drumLong_7.wav",
+    };
+
+    // 建立 Audio 物件，預先載入
+    const audioMap = {};
+    for (let d = 1; d <= 7; d++) {
+      const key = String(d);
+      const a = new Audio(audioFiles[key]);
+      a.preload = "auto";
+      audioMap[key] = a;
+    }
+
+    const drum = document.getElementById("drum");
+
+    const pads = [
+      { degree: "1", angleDeg: -90 },  // 上方
+      { degree: "2", angleDeg: -38 },
+      { degree: "3", angleDeg: 16 },
+      { degree: "4", angleDeg: 70 },
+      { degree: "5", angleDeg: 132 },
+      { degree: "6", angleDeg: 180 },
+      { degree: "7", angleDeg: -152 },
+    ];
+
+    const radiusPercent = 38;
+
+    pads.forEach((p) => {
+      const pad = document.createElement("div");
+      pad.className = "pad";
+      pad.dataset.degree = p.degree;
+      const span = document.createElement("span");
+      span.textContent = p.degree;
+      pad.appendChild(span);
+
+      const rad = (p.angleDeg * Math.PI) / 180;
+      const cx = 50 + radiusPercent * Math.cos(rad);
+      const cy = 50 + radiusPercent * Math.sin(rad);
+
+      pad.style.left = cx + "%";
+      pad.style.top = cy + "%";
+      pad.style.transform = "translate(-50%, -50%)";
+
+      pad.addEventListener("click", () => {
+        playDegree(p.degree, pad);
+      });
+
+      drum.appendChild(pad);
+    });
+
+    function playDegree(degree, padElement) {
+      const key = String(degree);
+      const audio = audioMap[key];
+      if (!audio) return;
+
+      const clone = audio.cloneNode();
+      clone.currentTime = 0;
+      clone.play();
+
+      if (padElement) {
+        padElement.classList.add("active");
+        setTimeout(() => {
+          padElement.classList.remove("active");
+        }, 120);
+      } else {
+        const pads = document.querySelectorAll(".pad");
+        pads.forEach(p => {
+          if (p.dataset.degree === key) {
+            p.classList.add("active");
+            setTimeout(() => p.classList.remove("active"), 120);
+          }
+        });
+      }
+    }
+
+    // 鍵盤事件：按 1～7 發音
+    document.addEventListener("keydown", (e) => {
+      const key = e.key;
+      if (key >= "1" && key <= "7") {
+        e.preventDefault();
+        playDegree(key, null);
+      }
+    });
+  </script>
+</body>
+</html>
