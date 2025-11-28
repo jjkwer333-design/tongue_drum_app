@@ -222,10 +222,10 @@
       align-items: center;
       justify-content: center;
     }
-     .pad {
+       .pad {
       position: absolute;
-      width: 78px;   /* 預設給內圈用 */
-      height: 78px;
+      width: 80px;   /* 預設給內圈用 */
+      height: 80px;
       border-radius: 50%;
       border: 2px solid rgba(255,255,255,0.25);
       background: radial-gradient(circle at 30% 30%, #666 0, #333 60%, #222 100%);
@@ -236,21 +236,25 @@
       transition: transform 0.06s ease-out, box-shadow 0.06s ease-out, background 0.1s;
       user-select: none;
     }
+
     .pad span {
       font-size: 24px;
       font-weight: 600;
       text-shadow: 0 0 4px rgba(0,0,0,0.8);
     }
-    /* 內圈大顆（低音） */
-    .pad-big {
+
+    /* 內圈（低音）大顆 */
+    .pad-low {
       width: 90px;
       height: 90px;
     }
-    /* 外圈小顆（高音） */
-    .pad-small {
+
+    /* 外圈（高音）小顆 */
+    .pad-high {
       width: 60px;
       height: 60px;
     }
+
     .pad.active {
       transform: scale(1.08);
       box-shadow: 0 0 16px rgba(255, 230, 180, 0.9);
@@ -782,41 +786,50 @@
       }
     }
 
-   // ===== 鼓面排列：內圈 = 低音，大圓；外圈 = 高音，小圓 =====
-  // 目前內外圈都先用同一個音高，只是手的位置跟實際空靈鼓更接近
+   // ===== 鼓面排列：兩個 8 度 1～7 =====
+  // 內圈：低音 1～7（大顆）   外圈：高音 1～7（小顆）
+  // 註：現在高音先暫時用同一組音檔，之後我們再換成真正高八度 wav
   const padLayout = [
-    // 內圈：低音 1～7（大顆）
-    { degree: "1", x: 50, y: 50, size: "big" },  // 中央
-    { degree: "2", x: 65, y: 32, size: "big" },
-    { degree: "3", x: 75, y: 50, size: "big" },
-    { degree: "4", x: 65, y: 68, size: "big" },
-    { degree: "5", x: 35, y: 68, size: "big" },
-    { degree: "6", x: 25, y: 50, size: "big" },
-    { degree: "7", x: 35, y: 32, size: "big" },
+    // 內圈：低音 1～7
+    { degree: "1", octave: "low",  x: 50, y: 50 },
+    { degree: "2", octave: "low",  x: 50, y: 24 },
+    { degree: "3", octave: "low",  x: 70, y: 32 },
+    { degree: "4", octave: "low",  x: 70, y: 68 },
+    { degree: "5", octave: "low",  x: 50, y: 76 },
+    { degree: "6", octave: "low",  x: 30, y: 68 },
+    { degree: "7", octave: "low",  x: 30, y: 32 },
 
-    // 外圈：高音 1～7（小顆）　→ 同一個數字靠近內圈對應位置
-    { degree: "1", x: 50, y: 14, size: "small" },
-    { degree: "2", x: 78, y: 26, size: "small" },
-    { degree: "3", x: 88, y: 50, size: "small" },
-    { degree: "4", x: 78, y: 74, size: "small" },
-    { degree: "5", x: 22, y: 74, size: "small" },
-    { degree: "6", x: 12, y: 50, size: "small" },
-    { degree: "7", x: 22, y: 26, size: "small" },
+    // 外圈：高音 1～7
+    { degree: "1", octave: "high", x: 50, y: 10 },
+    { degree: "2", octave: "high", x: 79, y: 22 },
+    { degree: "3", octave: "high", x: 92, y: 50 },
+    { degree: "4", octave: "high", x: 79, y: 78 },
+    { degree: "5", octave: "high", x: 21, y: 78 },
+    { degree: "6", octave: "high", x:  8, y: 50 },
+    { degree: "7", octave: "high", x: 21, y: 22 },
   ];
 
   function createDrum(containerId, onPadClick) {
     const container = document.getElementById(containerId);
     if (!container) return;
+
     padLayout.forEach((p) => {
       const pad = document.createElement("div");
       pad.className = "pad";
-      if (p.size === "big") pad.classList.add("pad-big");
-      if (p.size === "small") pad.classList.add("pad-small");
+
+      // 低音 / 高音決定大小
+      if (p.octave === "low") {
+        pad.classList.add("pad-low");
+      } else if (p.octave === "high") {
+        pad.classList.add("pad-high");
+      }
 
       pad.dataset.degree = p.degree;
+      pad.dataset.octave = p.octave;
 
       const span = document.createElement("span");
-      span.textContent = p.degree; // 內外圈都只顯示 1～7
+      // 高音顯示「1˙ 2˙ 3˙」這種效果
+      span.textContent = p.octave === "high" ? p.degree + "˙" : p.degree;
       pad.appendChild(span);
 
       pad.style.left = p.x + "%";
@@ -824,13 +837,13 @@
       pad.style.transform = "translate(-50%, -50%)";
 
       pad.addEventListener("click", () => {
-        onPadClick(p.degree, pad); // 暫時同一個 degree 播同一個音
+        // 目前先用同一組 1～7 音檔發聲，之後再加入高八度
+        onPadClick(p.degree, pad);
       });
 
       container.appendChild(pad);
     });
   }
-
 
     // Page1 鼓面
     createDrum("drum-play", (degree, pad) => playDegree(degree, pad));
@@ -998,4 +1011,5 @@
   </script>
 </body>
 </html>
+
 
