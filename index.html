@@ -1,16 +1,3 @@
-<body>
-
-<!-- 預覽網站按鈕 -->
-<div style="width: 100%; background:#1e1e1e; padding:12px; text-align:center; position:sticky; top:0; z-index:999;">
-  <a href="https://jjkwer333-design.github.io/tongue_drum_app/" 
-     target="_blank"
-     style="color:#00eaff; font-size:18px; text-decoration:none; font-weight:bold;">
-     🔗 點我開啟網站預覽（GitHub Pages）
-  </a>
-</div>
-
-<!-- 以下是你的原本內容 -->
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -63,7 +50,7 @@
     }
 
     .mobile-menu-toggle {
-      display: none; /* 桌機隱藏，手機才顯示 */
+      display: none;
       border-radius: 8px;
       border: 1px solid #555;
       background: #181818;
@@ -154,6 +141,14 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      position: relative; /* 給設定面板定位用 */
+    }
+
+    .header-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
 
     .header h1 {
@@ -165,6 +160,58 @@
     .header-sub {
       font-size: 13px;
       color: #ccc;
+    }
+
+    .settings-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid #666;
+      background: #181818;
+      color: #f5f5f5;
+      font-size: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+    }
+    .settings-btn:hover {
+      border-color: #f5d36f;
+      color: #f5d36f;
+    }
+
+    .settings-panel {
+      position: absolute;
+      right: 20px;
+      top: 58px;
+      background: #111;
+      border-radius: 10px;
+      border: 1px solid #444;
+      padding: 10px 12px;
+      font-size: 12px;
+      min-width: 200px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.7);
+      display: none;
+      z-index: 1100;
+    }
+    .settings-panel.show {
+      display: block;
+    }
+    .settings-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .settings-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .settings-note {
+      font-size: 11px;
+      color: #888;
+      margin-top: 3px;
     }
 
     .page {
@@ -415,6 +462,97 @@
       text-align: right;
     }
 
+    /* ---- 右下角預覽 FAB ---- */
+    .fab-preview {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #f3d36f 0, #cc8a33 60%, #7b4b15 100%);
+      color: #181818;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      text-decoration: none;
+      box-shadow: 0 0 14px rgba(0,0,0,0.8);
+      border: 1px solid #f9e7af;
+      z-index: 1300;
+    }
+    .fab-preview:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    /* ---- Debug 面板 ---- */
+    .debug-panel {
+      position: fixed;
+      left: 8px;
+      bottom: 8px;
+      width: 270px;
+      max-height: 40vh;
+      background: #111;
+      border-radius: 8px;
+      border: 1px solid #444;
+      font-size: 11px;
+      color: #eee;
+      display: none;
+      flex-direction: column;
+      z-index: 1200;
+    }
+    .debug-panel.show {
+      display: flex;
+    }
+    .debug-header {
+      padding: 4px 6px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+    .debug-body {
+      padding: 4px 6px;
+      overflow-y: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+    .debug-clear-btn {
+      border-radius: 6px;
+      border: 1px solid #666;
+      background:#222;
+      color:#eee;
+      font-size:10px;
+      padding:2px 6px;
+      cursor:pointer;
+    }
+
+    /* ---- 更新提示 Toast ---- */
+    .update-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 80px;
+      transform: translateX(-50%) translateY(100%);
+      background: rgba(0,0,0,0.9);
+      border-radius: 999px;
+      border: 1px solid #f5d36f;
+      padding: 6px 14px;
+      font-size: 12px;
+      color: #f5f5f5;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 1500;
+      text-align: center;
+    }
+    .update-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
     /* ---- 手機版 RWD ---- */
     @media (max-width: 900px) {
       .app-shell {
@@ -433,7 +571,7 @@
         display: none;
       }
       .sidebar-nav {
-        display: none;             /* 收合狀態 */
+        display: none;
         margin-top: 8px;
       }
       .sidebar-nav.open {
@@ -482,7 +620,7 @@
 </head>
 <body>
   <div class="app-shell">
-    <!-- Sidebar：桌機在左，手機在上方 -->
+    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header-row">
         <div>
@@ -492,7 +630,6 @@
         <button class="mobile-menu-toggle" type="button">☰ 選單</button>
       </div>
 
-      <!-- 這一塊會在手機版被收合 / 展開 -->
       <div class="sidebar-nav" id="sidebarNav">
         <button class="nav-btn active" data-page="page-play">
           <span class="icon">🥁</span> 空靈鼓演奏器
@@ -518,21 +655,36 @@
       </div>
 
       <div class="sidebar-footer">
-        v0.4 聽寫練習版<br />
+        v0.5.0 聽寫 + Debug 版<br />
         音檔路徑：assets/drums/drum_d/
       </div>
     </aside>
 
-    <!-- 右側主畫面 -->
+    <!-- Main -->
     <main class="main-area">
       <div class="header">
-        <h1>空靈鼓練習 App</h1>
+        <div class="header-top-row">
+          <h1>空靈鼓練習 App</h1>
+          <button class="settings-btn" id="btnSettings" type="button" title="設定 / Debug">⚙</button>
+        </div>
         <div class="header-sub">
-          已完成：D 調鼓面演奏 + 聽寫練習 + 手機版選單。接下來可加入自動旋律與和弦伴奏。
+          已完成：D 調鼓面演奏 + 聽寫練習 + 手機版選單 + Debug 工具。接下來可加入自動旋律與和弦伴奏。
         </div>
       </div>
 
-      <!-- Page 1：空靈鼓演奏器 -->
+      <!-- 設定面板 -->
+      <div class="settings-panel" id="settingsPanel">
+        <div class="settings-title">設定 / 工具</div>
+        <label class="settings-item">
+          <input type="checkbox" id="chkDebug" />
+          顯示 Debug 面板
+        </label>
+        <div class="settings-note">
+          Debug 面板會在左下角顯示錯誤與紀錄，僅供你自己測試用，不會影響一般使用者。
+        </div>
+      </div>
+
+      <!-- Page 1：演奏器 -->
       <section id="page-play" class="page page-play active">
         <div class="drum-wrapper">
           <div class="drum-container" id="drum-play"></div>
@@ -610,12 +762,34 @@
       </section>
 
       <div class="footer">
-        v0.4：鼓面 + 手機版選單 + 聽寫練習（2/3/4 音題目 + 鼓面 & 按鈕作答）。
+        v0.5.0：鼓面 + 手機版選單 + 聽寫練習（2/3/4 音）+ 設定 / Debug / 更新提示。
       </div>
     </main>
   </div>
 
+  <!-- 右下角預覽 FAB -->
+  <a href="https://jjkwer333-design.github.io/tongue_drum_app/"
+     class="fab-preview"
+     target="_blank"
+     title="開啟 GitHub Pages 預覽">
+    🔗
+  </a>
+
+  <!-- Debug Panel -->
+  <div class="debug-panel" id="debugPanel">
+    <div class="debug-header">
+      Debug Logs
+      <button class="debug-clear-btn" id="btnDebugClear">清除</button>
+    </div>
+    <div class="debug-body" id="debugBody"></div>
+  </div>
+
+  <!-- 更新提示 Toast -->
+  <div class="update-toast" id="updateToast"></div>
+
   <script>
+    const APP_VERSION = "0.5.0";
+
     // ---- 左側選單：切換頁面 ----
     const navButtons = document.querySelectorAll(".nav-btn");
     const pages = document.querySelectorAll(".page");
@@ -623,274 +797,4 @@
     const mobileToggle = document.querySelector(".mobile-menu-toggle");
     let currentPageId = "page-play";
 
-    function showPage(pageId) {
-      currentPageId = pageId;
-      pages.forEach(p => {
-        p.classList.toggle("active", p.id === pageId);
-      });
-      navButtons.forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.page === pageId);
-      });
-      if (window.innerWidth <= 900) {
-        sidebarNav.classList.remove("open");
-      }
-    }
-
-    navButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const target = btn.dataset.page;
-        showPage(target);
-      });
-    });
-
-    if (mobileToggle) {
-      mobileToggle.addEventListener("click", () => {
-        sidebarNav.classList.toggle("open");
-      });
-    }
-
-    // ---- 通用音檔設定 ----
-    const audioFiles = {
-      "1": "assets/drums/drum_d/drumLong_1.wav",
-      "2": "assets/drums/drum_d/drumLong_2.wav",
-      "3": "assets/drums/drum_d/drumLong_3.wav",
-      "4": "assets/drums/drum_d/drumLong_4.wav",
-      "5": "assets/drums/drum_d/drumLong_5.wav",
-      "6": "assets/drums/drum_d/drumLong_6.wav",
-      "7": "assets/drums/drum_d/drumLong_7.wav",
-    };
-
-    const audioMap = {};
-    for (let d = 1; d <= 7; d++) {
-      const key = String(d);
-      const a = new Audio(audioFiles[key]);
-      a.preload = "auto";
-      audioMap[key] = a;
-    }
-
-    // ---- 建立鼓面（共用排列） ----
-    const padLayout = [
-      { degree: "1", x: 50, y: 50, center: true },
-      { degree: "2", x: 50, y: 12 },
-      { degree: "3", x: 82, y: 28 },
-      { degree: "4", x: 82, y: 68 },
-      { degree: "5", x: 50, y: 88 },
-      { degree: "6", x: 18, y: 68 },
-      { degree: "7", x: 18, y: 28 },
-    ];
-
-    function createDrum(containerId, onPadClick) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      padLayout.forEach(p => {
-        const pad = document.createElement("div");
-        pad.className = "pad" + (p.center ? " center" : "");
-        pad.dataset.degree = p.degree;
-
-        const span = document.createElement("span");
-        span.textContent = p.degree;
-        pad.appendChild(span);
-
-        pad.style.left = p.x + "%";
-        pad.style.top = p.y + "%";
-        pad.style.transform = "translate(-50%, -50%)";
-
-        pad.addEventListener("click", () => {
-          onPadClick(p.degree, pad);
-        });
-
-        container.appendChild(pad);
-      });
-    }
-
-    function playDegree(degree, padElement) {
-      const key = String(degree);
-      const audio = audioMap[key];
-      if (!audio) return;
-
-      const clone = audio.cloneNode();
-      clone.currentTime = 0;
-      clone.play();
-
-      if (padElement) {
-        padElement.classList.add("active");
-        setTimeout(() => padElement.classList.remove("active"), 120);
-      } else {
-        const pads = document.querySelectorAll(".pad");
-        pads.forEach(p => {
-          if (p.dataset.degree === key) {
-            p.classList.add("active");
-            setTimeout(() => p.classList.remove("active"), 120);
-          }
-        });
-      }
-    }
-
-    // Page1：自由演奏鼓面
-    createDrum("drum-play", (degree, pad) => {
-      playDegree(degree, pad);
-    });
-
-    // ---- Page2：聽寫練習 ----
-    const earLevelBtns = document.querySelectorAll(".ear-level-btn");
-    const btnEarNew = document.getElementById("btnEarNew");
-    const btnEarReplay = document.getElementById("btnEarReplay");
-    const btnEarClear = document.getElementById("btnEarClear");
-    const btnEarCheck = document.getElementById("btnEarCheck");
-    const earStatus = document.getElementById("earStatus");
-    const earQuestionLenSpan = document.getElementById("earQuestionLen");
-    const earAnswerTextSpan = document.getElementById("earAnswerText");
-
-    let earDifficulty = 3;
-    let earQuestion = [];
-    let earAnswer = [];
-    let isPlayingQuestion = false;
-
-    earLevelBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        earLevelBtns.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        earDifficulty = parseInt(btn.dataset.len, 10) || 3;
-        if (earQuestion.length === 0) {
-          earStatus.textContent = `已選擇題目長度：${earDifficulty} 音。按「出題」開始。`;
-        }
-      });
-    });
-
-    function updateEarAnswerText() {
-      if (earAnswer.length === 0) {
-        earAnswerTextSpan.textContent = "（尚未作答）";
-      } else {
-        earAnswerTextSpan.textContent = earAnswer.join(" - ");
-      }
-    }
-
-    function setEarQuestion(seq) {
-      earQuestion = seq.slice();
-      earQuestionLenSpan.textContent = String(earQuestion.length);
-      earStatus.textContent = "題目已出，先聽清楚再作答。可以按「再聽一次」。";
-      btnEarReplay.disabled = false;
-      earAnswer = [];
-      updateEarAnswerText();
-    }
-
-    function generateQuestion(len) {
-      const seq = [];
-      for (let i = 0; i < len; i++) {
-        const d = String(1 + Math.floor(Math.random() * 7));
-        seq.push(d);
-      }
-      return seq;
-    }
-
-    function playQuestionSequence(index = 0) {
-      if (!earQuestion || earQuestion.length === 0) return;
-      if (index === 0) {
-        isPlayingQuestion = true;
-        earStatus.textContent = "正在播放題目，請專心聽。";
-      }
-      if (index >= earQuestion.length) {
-        isPlayingQuestion = false;
-        earStatus.textContent = "題目播放完畢，請在鼓面或 1～7 按鈕上作答。";
-        return;
-      }
-      const d = earQuestion[index];
-      playDegree(d, null);
-      setTimeout(() => playQuestionSequence(index + 1), 650);
-    }
-
-    function addEarAnswer(digit) {
-      if (!digit) return;
-      if (isPlayingQuestion) return;
-      if (!earQuestion || earQuestion.length === 0) {
-        earStatus.textContent = "請先按「出題」。";
-        return;
-      }
-      earAnswer.push(digit);
-      updateEarAnswerText();
-      playDegree(digit, null);
-    }
-
-    btnEarNew.addEventListener("click", () => {
-      if (isPlayingQuestion) return;
-      const seq = generateQuestion(earDifficulty);
-      setEarQuestion(seq);
-      playQuestionSequence(0);
-    });
-
-    btnEarReplay.addEventListener("click", () => {
-      if (isPlayingQuestion) return;
-      if (!earQuestion || earQuestion.length === 0) {
-        earStatus.textContent = "目前沒有題目，請先按「出題」。";
-        return;
-      }
-      playQuestionSequence(0);
-    });
-
-    btnEarClear.addEventListener("click", () => {
-      earAnswer = [];
-      updateEarAnswerText();
-      if (earQuestion.length > 0) {
-        earStatus.textContent = "答案已清除，請重新作答。";
-      } else {
-        earStatus.textContent = "目前沒有題目，請先按「出題」。";
-      }
-    });
-
-    btnEarCheck.addEventListener("click", () => {
-      if (!earQuestion || earQuestion.length === 0) {
-        earStatus.textContent = "目前沒有題目，請先按「出題」。";
-        return;
-      }
-      if (earAnswer.length === 0) {
-        earStatus.textContent = "尚未作答，請在鼓面或 1～7 按鈕上輸入答案。";
-        return;
-      }
-      const correct =
-        earAnswer.length === earQuestion.length &&
-        earAnswer.every((v, i) => v === earQuestion[i]);
-      if (correct) {
-        earStatus.textContent = "✅ 答對了！可以換一題或提高難度。";
-      } else {
-        earStatus.textContent =
-          "❌ 再試試看！正確答案是：「" + earQuestion.join(" - ") + "」。";
-      }
-    });
-
-    // Page2：鼓面（用來回答）
-    createDrum("drum-ear", (degree, pad) => {
-      addEarAnswer(degree);
-    });
-
-    // Page2：1~7 按鈕
-    const earButtonsRow = document.getElementById("earButtonsRow");
-    if (earButtonsRow) {
-      for (let d = 1; d <= 7; d++) {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "ear-digit-btn";
-        btn.textContent = String(d);
-        btn.dataset.digit = String(d);
-        btn.addEventListener("click", () => {
-          addEarAnswer(btn.dataset.digit);
-        });
-        earButtonsRow.appendChild(btn);
-      }
-    }
-
-    // 鍵盤 1～7：在演奏頁只發音，在聽寫頁：發音＋作答
-    document.addEventListener("keydown", (e) => {
-      const key = e.key;
-      if (key >= "1" && key <= "7") {
-        e.preventDefault();
-        if (currentPageId === "page-ear") {
-          addEarAnswer(key);
-        } else {
-          playDegree(key, null);
-        }
-      }
-    });
-  </script>
-</body>
-</html>
-
+   
