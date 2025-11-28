@@ -1,388 +1,976 @@
-<script>
-  // ===== 版本號：用來顯示「網站已更新」的小提示 =====
-  const APP_VERSION = "0.5.0";
-
-  // ===== 左側選單：切換頁面 =====
-  const navButtons = document.querySelectorAll(".nav-btn");
-  const pages = document.querySelectorAll(".page");
-  const sidebarNav = document.getElementById("sidebarNav");
-  const mobileToggle = document.querySelector(".mobile-menu-toggle");
-  let currentPageId = "page-play";
-
-  function showPage(pageId) {
-    currentPageId = pageId;
-    pages.forEach((p) => {
-      p.classList.toggle("active", p.id === pageId);
-    });
-    navButtons.forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.page === pageId);
-    });
-    // 手機版切換頁面後，自動收起選單
-    if (window.innerWidth <= 900) {
-      sidebarNav.classList.remove("open");
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>空靈鼓練習 App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #222 0, #111 40%, #000 100%);
+      color: #f5f5f5;
+      min-height: 100vh;
     }
-    logDebug("切換頁面：" + pageId);
-  }
 
-  navButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const target = btn.dataset.page;
-      showPage(target);
-    });
-  });
-
-  if (mobileToggle) {
-    mobileToggle.addEventListener("click", () => {
-      sidebarNav.classList.toggle("open");
-    });
-  }
-
-  // ===== 設定 / Debug 面板 =====
-  const btnSettings = document.getElementById("btnSettings");
-  const settingsPanel = document.getElementById("settingsPanel");
-  const chkDebug = document.getElementById("chkDebug");
-  const debugPanel = document.getElementById("debugPanel");
-  const debugBody = document.getElementById("debugBody");
-  const btnDebugClear = document.getElementById("btnDebugClear");
-
-  // Debug 開關狀態從 localStorage 還原
-  const DEBUG_KEY = "tongue_drum_app_debug";
-  const savedDebug = localStorage.getItem(DEBUG_KEY) === "1";
-  if (chkDebug) {
-    chkDebug.checked = savedDebug;
-  }
-  if (savedDebug && debugPanel) {
-    debugPanel.classList.add("show");
-  }
-
-  function logDebug(msg) {
-    if (!debugBody) return;
-    const time = new Date().toLocaleTimeString("zh-TW", { hour12: false });
-    debugBody.textContent += `[${time}] ${msg}\n`;
-    debugBody.scrollTop = debugBody.scrollHeight;
-  }
-
-  if (btnSettings && settingsPanel) {
-    btnSettings.addEventListener("click", () => {
-      settingsPanel.classList.toggle("show");
-    });
-
-    // 點頁面其它地方收起設定面板
-    document.addEventListener("click", (e) => {
-      if (
-        !settingsPanel.contains(e.target) &&
-        e.target !== btnSettings
-      ) {
-        settingsPanel.classList.remove("show");
-      }
-    });
-  }
-
-  if (chkDebug && debugPanel) {
-    chkDebug.addEventListener("change", () => {
-      const on = chkDebug.checked;
-      if (on) {
-        debugPanel.classList.add("show");
-        localStorage.setItem(DEBUG_KEY, "1");
-        logDebug("Debug 面板已開啟");
-      } else {
-        debugPanel.classList.remove("show");
-        localStorage.setItem(DEBUG_KEY, "0");
-      }
-    });
-  }
-
-  if (btnDebugClear && debugBody) {
-    btnDebugClear.addEventListener("click", () => {
-      debugBody.textContent = "";
-    });
-  }
-
-  // 監聽 JS 錯誤，寫進 Debug 面板
-  window.addEventListener("error", (event) => {
-    logDebug("❌ JS Error: " + (event.message || ""));
-  });
-  window.addEventListener("unhandledrejection", (event) => {
-    logDebug("❌ Promise Error: " + (event.reason || ""));
-  });
-
-  // ===== 更新提示 Toast =====
-  const updateToast = document.getElementById("updateToast");
-  function showUpdateToast(msg) {
-    if (!updateToast) return;
-    updateToast.textContent = msg;
-    updateToast.classList.add("show");
-    setTimeout(() => {
-      updateToast.classList.remove("show");
-    }, 3500);
-  }
-
-  (function checkVersion() {
-    try {
-      const VERSION_KEY = "tongue_drum_app_version";
-      const oldVer = localStorage.getItem(VERSION_KEY);
-      if (oldVer && oldVer !== APP_VERSION) {
-        showUpdateToast(`網站已更新到 v${APP_VERSION}（原本 v${oldVer}）`);
-      } else if (!oldVer) {
-        showUpdateToast(`歡迎使用空靈鼓練習 App v${APP_VERSION}`);
-      }
-      localStorage.setItem(VERSION_KEY, APP_VERSION);
-    } catch (e) {
-      console.warn("version check error", e);
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
     }
-  })();
 
-  // ===== 音檔設定 =====
-  const audioFiles = {
-    "1": "assets/drums/drum_d/drumLong_1.wav",
-    "2": "assets/drums/drum_d/drumLong_2.wav",
-    "3": "assets/drums/drum_d/drumLong_3.wav",
-    "4": "assets/drums/drum_d/drumLong_4.wav",
-    "5": "assets/drums/drum_d/drumLong_5.wav",
-    "6": "assets/drums/drum_d/drumLong_6.wav",
-    "7": "assets/drums/drum_d/drumLong_7.wav",
-  };
+    /* Sidebar */
+    .sidebar {
+      width: 230px;
+      background: linear-gradient(180deg, #191919 0%, #101010 100%);
+      border-right: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 12px;
+      gap: 10px;
+    }
+    .sidebar-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .sidebar-sub {
+      font-size: 11px;
+      color: #aaa;
+      margin-top: 2px;
+    }
+    .mobile-menu-toggle {
+      display: none;
+      border-radius: 8px;
+      border: 1px solid #555;
+      background: #181818;
+      color: #eee;
+      font-size: 14px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
 
-  const audioMap = {};
-  for (let d = 1; d <= 7; d++) {
-    const key = String(d);
-    const a = new Audio(audioFiles[key]);
-    a.preload = "auto";
-    audioMap[key] = a;
-  }
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .nav-btn {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #ddd;
+      font-size: 14px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.05s;
+    }
+    .nav-btn span.icon { font-size: 16px; }
+    .nav-btn:hover { background: rgba(255,255,255,0.04); }
+    .nav-btn.active {
+      background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
+      color: #1a1a1a;
+      border-color: #f9e7af;
+      transform: translateX(1px);
+    }
 
-  function playDegree(degree, padElement) {
-    const key = String(degree);
-    const audio = audioMap[key];
-    if (!audio) return;
+    .external-link-box {
+      margin-top: 4px;
+      padding: 7px 7px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: radial-gradient(circle at 0 0, #333 0, #181818 55%, #101010 100%);
+      font-size: 12px;
+      color: #ddd;
+    }
+    .external-link-title {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 3px;
+    }
+    .external-link-btn {
+      display: inline-block;
+      margin-top: 3px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid #f5d36f;
+      background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
+      color: #181818;
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .external-link-btn:hover { filter: brightness(1.05); }
 
-    const clone = audio.cloneNode();
-    clone.currentTime = 0;
-    clone.play();
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 11px;
+      color: #666;
+    }
 
-    if (padElement) {
-      padElement.classList.add("active");
-      setTimeout(() => padElement.classList.remove("active"), 120);
-    } else {
-      const pads = document.querySelectorAll(".pad");
-      pads.forEach((p) => {
-        if (p.dataset.degree === key) {
-          p.classList.add("active");
-          setTimeout(() => p.classList.remove("active"), 120);
+    /* Main area */
+    .main-area {
+      flex: 1;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+    }
+    .header-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 1px;
+    }
+    .header-sub {
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    .settings-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid #666;
+      background: #181818;
+      color: #f5f5f5;
+      font-size: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 8px rgba(0,0,0,0.6);
+    }
+    .settings-btn:hover {
+      border-color: #f5d36f;
+      color: #f5d36f;
+    }
+
+    .settings-panel {
+      position: absolute;
+      right: 20px;
+      top: 58px;
+      background: #111;
+      border-radius: 10px;
+      border: 1px solid #444;
+      padding: 10px 12px;
+      font-size: 12px;
+      min-width: 200px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.7);
+      display: none;
+      z-index: 1100;
+    }
+    .settings-panel.show { display: block; }
+    .settings-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .settings-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+    .settings-note {
+      font-size: 11px;
+      color: #888;
+      margin-top: 3px;
+    }
+
+    .page {
+      display: none;
+      flex: 1;
+      margin-top: 10px;
+    }
+    .page.active { display: flex; }
+
+    /* Page: 演奏器 */
+    .page-play { flex-direction: column; align-items: center; gap: 12px; }
+
+    .drum-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .drum-container {
+      position: relative;
+      width: min(480px, 76vw);
+      height: min(480px, 76vw);
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, #444 0, #222 40%, #111 100%);
+      box-shadow: 0 0 25px rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pad {
+      position: absolute;
+      width: 78px;
+      height: 78px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      background: radial-gradient(circle at 30% 30%, #666 0, #333 60%, #222 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.06s ease-out, box-shadow 0.06s ease-out, background 0.1s;
+      user-select: none;
+    }
+    .pad span {
+      font-size: 24px;
+      font-weight: 600;
+      text-shadow: 0 0 4px rgba(0,0,0,0.8);
+    }
+    .pad.center {
+      width: 95px;
+      height: 95px;
+    }
+    .pad.active {
+      transform: scale(1.08);
+      box-shadow: 0 0 16px rgba(255, 230, 180, 0.9);
+      background: radial-gradient(circle at 30% 30%, #f5d37a 0, #c98b35 60%, #7c4b15 100%);
+    }
+
+    .drum-caption {
+      font-size: 13px;
+      color: #ddd;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .kbd {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #666;
+      background: #222;
+      font-family: monospace;
+      font-size: 12px;
+      margin: 0 2px;
+    }
+
+    .help-panel {
+      font-size: 13px;
+      color: #ddd;
+      text-align: center;
+      line-height: 1.6;
+      max-width: 520px;
+    }
+
+    /* Page: 聽寫練習 */
+    .page-ear { flex-direction: column; align-items: center; gap: 16px; }
+    .ear-controls {
+      max-width: 640px;
+      width: 100%;
+      background: rgba(0,0,0,0.35);
+      border-radius: 12px;
+      border: 1px solid #333;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+    .ear-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .ear-label {
+      font-size: 13px;
+      color: #ddd;
+      margin-right: 4px;
+    }
+    .ear-level-btn {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #666;
+      background: #222;
+      color: #eee;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .ear-level-btn.active {
+      border-color: #f5d36f;
+      background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
+      color: #181818;
+    }
+    .ear-main-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #666;
+      background: #222;
+      color: #eee;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .ear-main-btn.primary {
+      border-color: #f5d36f;
+      background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
+      color: #181818;
+    }
+    .ear-main-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .ear-status {
+      font-size: 13px;
+      color: #f0e6b2;
+      margin-top: 2px;
+    }
+    .ear-answer {
+      font-size: 13px;
+      color: #ddd;
+      margin-top: 4px;
+      line-height: 1.6;
+    }
+    .ear-answer span {
+      font-weight: 500;
+      color: #f3d36f;
+    }
+    .ear-input-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .ear-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+    }
+    .ear-digit-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid #666;
+      background: #222;
+      color: #eee;
+      font-size: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ear-digit-btn:hover { border-color: #f5d36f; }
+    .ear-hint {
+      font-size: 11px;
+      color: #aaa;
+      text-align: center;
+    }
+
+    /* Placeholder pages */
+    .placeholder {
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.7;
+      max-width: 520px;
+      margin-top: 20px;
+    }
+    .placeholder-title {
+      font-size: 16px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .placeholder-tag {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid #666;
+      margin-bottom: 8px;
+      color: #aaa;
+    }
+
+    .footer {
+      font-size: 11px;
+      color: #666;
+      margin-top: auto;
+      margin-bottom: 6px;
+      text-align: right;
+    }
+
+    /* 右下角浮動預覽按鈕 */
+    .fab-preview {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #f3d36f 0, #cc8a33 60%, #7b4b15 100%);
+      color: #181818;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      text-decoration: none;
+      box-shadow: 0 0 14px rgba(0,0,0,0.8);
+      border: 1px solid #f9e7af;
+      z-index: 1300;
+    }
+    .fab-preview:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    /* Debug 面板 */
+    .debug-panel {
+      position: fixed;
+      left: 8px;
+      bottom: 8px;
+      width: 270px;
+      max-height: 40vh;
+      background: #111;
+      border-radius: 8px;
+      border: 1px solid #444;
+      font-size: 11px;
+      color: #eee;
+      display: none;
+      flex-direction: column;
+      z-index: 1200;
+    }
+    .debug-panel.show { display: flex; }
+    .debug-header {
+      padding: 4px 6px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+    .debug-body {
+      padding: 4px 6px;
+      overflow-y: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+      line-height: 1.4;
+    }
+    .debug-clear-btn {
+      border-radius: 6px;
+      border: 1px solid #666;
+      background:#222;
+      color:#eee;
+      font-size:10px;
+      padding:2px 6px;
+      cursor:pointer;
+    }
+
+    /* RWD */
+    @media (max-width: 900px) {
+      .app-shell { flex-direction: column; }
+      .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #333;
+        padding: 10px 12px;
+      }
+      .mobile-menu-toggle { display:inline-block; }
+      .sidebar-sub { display:none; }
+      .sidebar-nav { display:none; margin-top:8px; }
+      .sidebar-nav.open { display:flex; flex-direction:column; gap:8px; }
+      .main-area { padding: 12px; }
+      .help-panel { font-size:12px; padding:0 4px; }
+      .pad { width:68px; height:68px; }
+      .pad.center { width:86px; height:86px; }
+      .ear-controls { font-size:12px; }
+      .ear-answer { font-size:12px; }
+    }
+    @media (max-width: 600px) {
+      .drum-container {
+        width: min(420px, 84vw);
+        height: min(420px, 84vw);
+      }
+      .pad { width:62px; height:62px; }
+      .pad.center { width:80px; height:80px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-header-row">
+        <div>
+          <div class="sidebar-title">空靈鼓練習 App</div>
+          <div class="sidebar-sub">選擇你要的模式</div>
+        </div>
+        <button class="mobile-menu-toggle" type="button">☰ 選單</button>
+      </div>
+
+      <div class="sidebar-nav" id="sidebarNav">
+        <button class="nav-btn active" data-page="page-play">
+          <span class="icon">🥁</span> 空靈鼓演奏器
+        </button>
+        <button class="nav-btn" data-page="page-ear">
+          <span class="icon">👂</span> 聽寫練習
+        </button>
+        <button class="nav-btn" data-page="page-melody">
+          <span class="icon">🎵</span> 自動旋律
+        </button>
+        <button class="nav-btn" data-page="page-chord">
+          <span class="icon">🎹</span> 和弦伴奏器
+        </button>
+
+        <div class="external-link-box">
+          <div class="external-link-title">其他練習工具</div>
+          <a class="external-link-btn"
+             href="http://127.0.0.1:7860"
+             target="_blank">
+            🎧 開啟聽音辨識練習（Gradio）
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        v0.5.0 聽寫 + Debug 版<br/>音檔：assets/drums/drum_d/
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <div class="header">
+        <div class="header-top-row">
+          <h1>空靈鼓練習 App</h1>
+          <button class="settings-btn" id="btnSettings" type="button" title="設定 / Debug">⚙</button>
+        </div>
+        <div class="header-sub">
+          D 調鼓面演奏 + 聽寫練習 + 手機版選單 + Debug 工具。
+        </div>
+      </div>
+
+      <div class="settings-panel" id="settingsPanel">
+        <div class="settings-title">設定 / 工具</div>
+        <label class="settings-item">
+          <input type="checkbox" id="chkDebug" />
+          顯示 Debug 面板
+        </label>
+        <div class="settings-note">
+          只給你自己測試用，勾選後左下角會出現紀錄視窗。
+        </div>
+      </div>
+
+      <!-- Page: 演奏器 -->
+      <section id="page-play" class="page page-play active">
+        <div class="drum-wrapper">
+          <div class="drum-container" id="drum-play"></div>
+          <div class="drum-caption">
+            D 調空靈鼓（簡化 1～7 音階）<br/>
+            中央「1」為主音，外圈 2～7 以接近真實空靈鼓的排列方式環繞配置。
+          </div>
+        </div>
+        <div class="help-panel">
+          🔊 每個數字代表簡譜：1=D、2=E、3=F#、4=G、5=A、6=B、7=C#<br/>
+          🖱 滑鼠點選圓上的按鍵可以聽音階<br/>
+          ⌨️ 鍵盤按 <span class="kbd">1</span>～<span class="kbd">7</span> 也可以直接發音<br/>
+          📂 音檔位置：<code>assets/drums/drum_d/drumLong_*.wav</code>
+        </div>
+      </section>
+
+      <!-- Page: 聽寫練習 -->
+      <section id="page-ear" class="page page-ear">
+        <div class="ear-controls">
+          <div class="ear-row">
+            <span class="ear-label">🎯 難度：</span>
+            <button class="ear-level-btn" data-len="2">2 音</button>
+            <button class="ear-level-btn active" data-len="3">3 音</button>
+            <button class="ear-level-btn" data-len="4">4 音</button>
+          </div>
+          <div class="ear-row">
+            <button id="btnEarNew" class="ear-main-btn primary">出題</button>
+            <button id="btnEarReplay" class="ear-main-btn" disabled>再聽一次</button>
+            <button id="btnEarClear" class="ear-main-btn">清除答案</button>
+            <button id="btnEarCheck" class="ear-main-btn">送出答案</button>
+          </div>
+          <div class="ear-status" id="earStatus">按「出題」開始，題目會播放 2～4 個音。</div>
+          <div class="ear-answer">
+            題目音數：<span id="earQuestionLen">-</span><br/>
+            你的答案：<span id="earAnswerText">（尚未作答）</span>
+          </div>
+        </div>
+
+        <div class="ear-input-area">
+          <div class="drum-container" id="drum-ear"></div>
+          <div class="ear-buttons" id="earButtonsRow"></div>
+          <div class="ear-hint">
+            👉 可以點上面的鼓面、下面的 <b>1～7</b> 按鈕，或用鍵盤按
+            <span class="kbd">1</span>～<span class="kbd">7</span> 作答。
+          </div>
+        </div>
+      </section>
+
+      <!-- Page: 自動旋律（預留） -->
+      <section id="page-melody" class="page">
+        <div class="placeholder">
+          <div class="placeholder-tag">之後要加入</div>
+          <div class="placeholder-title">🎵 自動旋律生成（D 調手碟風格）</div>
+          <p>之後可以在這裡做自動旋律：療癒 / 冥想 / 開朗 等等風格。</p>
+        </div>
+      </section>
+
+      <!-- Page: 和弦伴奏器（預留） -->
+      <section id="page-chord" class="page">
+        <div class="placeholder">
+          <div class="placeholder-tag">進階功能</div>
+          <div class="placeholder-title">🎹 和弦伴奏器（Chord Progression）</div>
+          <p>未來可以選擇 I–V–vi–IV 等和弦進行，讓你在上面自由即興。</p>
+        </div>
+      </section>
+
+      <div class="footer">
+        v0.5.0：鼓面 + 手機版選單 + 聽寫練習 + 設定 / Debug / 浮動預覽鈕。
+      </div>
+    </main>
+  </div>
+
+  <!-- 右下角預覽 FAB -->
+  <a href="https://jjkwer333-design.github.io/tongue_drum_app/"
+     class="fab-preview"
+     target="_blank"
+     title="開啟 GitHub Pages 預覽">
+    🔗
+  </a>
+
+  <!-- Debug Panel -->
+  <div class="debug-panel" id="debugPanel">
+    <div class="debug-header">
+      Debug Logs
+      <button class="debug-clear-btn" id="btnDebugClear">清除</button>
+    </div>
+    <div class="debug-body" id="debugBody"></div>
+  </div>
+
+  <script>
+    const APP_VERSION = "0.5.0";
+
+    // --- 左側選單切換 ---
+    const navButtons = document.querySelectorAll(".nav-btn");
+    const pages = document.querySelectorAll(".page");
+    const sidebarNav = document.getElementById("sidebarNav");
+    const mobileToggle = document.querySelector(".mobile-menu-toggle");
+    let currentPageId = "page-play";
+
+    function showPage(pageId) {
+      currentPageId = pageId;
+      pages.forEach(p => p.classList.toggle("active", p.id === pageId));
+      navButtons.forEach(btn => btn.classList.toggle("active", btn.dataset.page === pageId));
+      if (window.innerWidth <= 900) sidebarNav.classList.remove("open");
+      logDebug("切換頁面：" + pageId);
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener("click", () => showPage(btn.dataset.page));
+    });
+
+    if (mobileToggle) {
+      mobileToggle.addEventListener("click", () => {
+        sidebarNav.classList.toggle("open");
+      });
+    }
+
+    // --- 設定 / Debug ---
+    const btnSettings = document.getElementById("btnSettings");
+    const settingsPanel = document.getElementById("settingsPanel");
+    const chkDebug = document.getElementById("chkDebug");
+    const debugPanel = document.getElementById("debugPanel");
+    const debugBody = document.getElementById("debugBody");
+    const btnDebugClear = document.getElementById("btnDebugClear");
+    const DEBUG_KEY = "tongue_drum_app_debug";
+
+    function logDebug(msg) {
+      if (!debugBody) return;
+      const time = new Date().toLocaleTimeString("zh-TW", { hour12:false });
+      debugBody.textContent += `[${time}] ${msg}\n`;
+      debugBody.scrollTop = debugBody.scrollHeight;
+    }
+
+    // 還原 debug 狀態
+    const savedDebug = localStorage.getItem(DEBUG_KEY) === "1";
+    if (chkDebug) chkDebug.checked = savedDebug;
+    if (savedDebug && debugPanel) debugPanel.classList.add("show");
+
+    if (btnSettings && settingsPanel) {
+      btnSettings.addEventListener("click", () => {
+        settingsPanel.classList.toggle("show");
+      });
+      document.addEventListener("click", (e) => {
+        if (!settingsPanel.contains(e.target) && e.target !== btnSettings) {
+          settingsPanel.classList.remove("show");
         }
       });
     }
-  }
 
-  // ===== 鼓面排列 =====
-  const padLayout = [
-    { degree: "1", x: 50, y: 50, center: true },
-    { degree: "2", x: 50, y: 12 },
-    { degree: "3", x: 82, y: 28 },
-    { degree: "4", x: 82, y: 68 },
-    { degree: "5", x: 50, y: 88 },
-    { degree: "6", x: 18, y: 68 },
-    { degree: "7", x: 18, y: 28 },
-  ];
-
-  function createDrum(containerId, onPadClick) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    padLayout.forEach((p) => {
-      const pad = document.createElement("div");
-      pad.className = "pad" + (p.center ? " center" : "");
-      pad.dataset.degree = p.degree;
-
-      const span = document.createElement("span");
-      span.textContent = p.degree;
-      pad.appendChild(span);
-
-      pad.style.left = p.x + "%";
-      pad.style.top = p.y + "%";
-      pad.style.transform = "translate(-50%, -50%)";
-
-      pad.addEventListener("click", () => {
-        onPadClick(p.degree, pad);
+    if (chkDebug && debugPanel) {
+      chkDebug.addEventListener("change", () => {
+        const on = chkDebug.checked;
+        if (on) {
+          debugPanel.classList.add("show");
+          localStorage.setItem(DEBUG_KEY, "1");
+          logDebug("Debug 面板已開啟");
+        } else {
+          debugPanel.classList.remove("show");
+          localStorage.setItem(DEBUG_KEY, "0");
+        }
       });
+    }
 
-      container.appendChild(pad);
-    });
-  }
+    if (btnDebugClear && debugBody) {
+      btnDebugClear.addEventListener("click", () => debugBody.textContent = "");
+    }
 
-  // Page1：自由演奏鼓面
-  createDrum("drum-play", (degree, pad) => {
-    playDegree(degree, pad);
-  });
+    window.addEventListener("error", evt => logDebug("❌ JS Error: " + (evt.message || "")));
+    window.addEventListener("unhandledrejection", evt => logDebug("❌ Promise Error: " + (evt.reason || "")));
 
-  // ===== Page2：聽寫練習 =====
-  const earLevelBtns = document.querySelectorAll(".ear-level-btn");
-  const btnEarNew = document.getElementById("btnEarNew");
-  const btnEarReplay = document.getElementById("btnEarReplay");
-  const btnEarClear = document.getElementById("btnEarClear");
-  const btnEarCheck = document.getElementById("btnEarCheck");
-  const earStatus = document.getElementById("earStatus");
-  const earQuestionLenSpan = document.getElementById("earQuestionLen");
-  const earAnswerTextSpan = document.getElementById("earAnswerText");
+    // --- 音檔 ---
+    const audioFiles = {
+      "1": "assets/drums/drum_d/drumLong_1.wav",
+      "2": "assets/drums/drum_d/drumLong_2.wav",
+      "3": "assets/drums/drum_d/drumLong_3.wav",
+      "4": "assets/drums/drum_d/drumLong_4.wav",
+      "5": "assets/drums/drum_d/drumLong_5.wav",
+      "6": "assets/drums/drum_d/drumLong_6.wav",
+      "7": "assets/drums/drum_d/drumLong_7.wav"
+    };
+    const audioMap = {};
+    for (let d = 1; d <= 7; d++) {
+      const key = String(d);
+      const a = new Audio(audioFiles[key]);
+      a.preload = "auto";
+      audioMap[key] = a;
+    }
 
-  let earDifficulty = 3;
-  let earQuestion = [];
-  let earAnswer = [];
-  let isPlayingQuestion = false;
+    function playDegree(degree, padElement) {
+      const key = String(degree);
+      const audio = audioMap[key];
+      if (!audio) return;
+      const clone = audio.cloneNode();
+      clone.currentTime = 0;
+      clone.play();
 
-  earLevelBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      earLevelBtns.forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      earDifficulty = parseInt(btn.dataset.len, 10) || 3;
-      if (earQuestion.length === 0) {
-        earStatus.textContent = `已選擇題目長度：${earDifficulty} 音。按「出題」開始。`;
+      if (padElement) {
+        padElement.classList.add("active");
+        setTimeout(() => padElement.classList.remove("active"), 120);
+      } else {
+        document.querySelectorAll(".pad").forEach(p => {
+          if (p.dataset.degree === key) {
+            p.classList.add("active");
+            setTimeout(() => p.classList.remove("active"), 120);
+          }
+        });
       }
-      logDebug("變更聽寫難度：" + earDifficulty);
+    }
+
+    // --- 鼓面排列 ---
+    const padLayout = [
+      { degree:"1", x:50, y:50, center:true },
+      { degree:"2", x:50, y:12 },
+      { degree:"3", x:82, y:28 },
+      { degree:"4", x:82, y:68 },
+      { degree:"5", x:50, y:88 },
+      { degree:"6", x:18, y:68 },
+      { degree:"7", x:18, y:28 }
+    ];
+
+    function createDrum(containerId, onPadClick) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      padLayout.forEach(p => {
+        const pad = document.createElement("div");
+        pad.className = "pad" + (p.center ? " center" : "");
+        pad.dataset.degree = p.degree;
+
+        const span = document.createElement("span");
+        span.textContent = p.degree;
+        pad.appendChild(span);
+
+        pad.style.left = p.x + "%";
+        pad.style.top = p.y + "%";
+        pad.style.transform = "translate(-50%, -50%)";
+
+        pad.addEventListener("click", () => onPadClick(p.degree, pad));
+        container.appendChild(pad);
+      });
+    }
+
+    // Page1 鼓面
+    createDrum("drum-play", (degree, pad) => playDegree(degree, pad));
+
+    // --- 聽寫練習 ---
+    const earLevelBtns = document.querySelectorAll(".ear-level-btn");
+    const btnEarNew = document.getElementById("btnEarNew");
+    const btnEarReplay = document.getElementById("btnEarReplay");
+    const btnEarClear = document.getElementById("btnEarClear");
+    const btnEarCheck = document.getElementById("btnEarCheck");
+    const earStatus = document.getElementById("earStatus");
+    const earQuestionLenSpan = document.getElementById("earQuestionLen");
+    const earAnswerTextSpan = document.getElementById("earAnswerText");
+
+    let earDifficulty = 3;
+    let earQuestion = [];
+    let earAnswer = [];
+    let isPlayingQuestion = false;
+
+    earLevelBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        earLevelBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        earDifficulty = parseInt(btn.dataset.len, 10) || 3;
+        if (earQuestion.length === 0) {
+          earStatus.textContent = `已選擇題目長度：${earDifficulty} 音。按「出題」開始。`;
+        }
+        logDebug("變更聽寫難度：" + earDifficulty);
+      });
     });
-  });
 
-  function updateEarAnswerText() {
-    if (earAnswer.length === 0) {
-      earAnswerTextSpan.textContent = "（尚未作答）";
-    } else {
-      earAnswerTextSpan.textContent = earAnswer.join(" - ");
-    }
-  }
-
-  function setEarQuestion(seq) {
-    earQuestion = seq.slice();
-    earQuestionLenSpan.textContent = String(earQuestion.length);
-    earStatus.textContent = "題目已出，先聽清楚再作答。可以按「再聽一次」。";
-    btnEarReplay.disabled = false;
-    earAnswer = [];
-    updateEarAnswerText();
-    logDebug("新題目：" + earQuestion.join(", "));
-  }
-
-  function generateQuestion(len) {
-    const seq = [];
-    for (let i = 0; i < len; i++) {
-      const d = String(1 + Math.floor(Math.random() * 7));
-      seq.push(d);
-    }
-    return seq;
-  }
-
-  function playQuestionSequence(index = 0) {
-    if (!earQuestion || earQuestion.length === 0) return;
-    if (index === 0) {
-      isPlayingQuestion = true;
-      earStatus.textContent = "正在播放題目，請專心聽。";
-    }
-    if (index >= earQuestion.length) {
-      isPlayingQuestion = false;
-      earStatus.textContent = "題目播放完畢，請在鼓面或 1～7 按鈕上作答。";
-      return;
-    }
-    const d = earQuestion[index];
-    playDegree(d, null);
-    setTimeout(() => playQuestionSequence(index + 1), 650);
-  }
-
-  function addEarAnswer(digit) {
-    if (!digit) return;
-    if (isPlayingQuestion) return;
-    if (!earQuestion || earQuestion.length === 0) {
-      earStatus.textContent = "請先按「出題」。";
-      return;
-    }
-    earAnswer.push(digit);
-    updateEarAnswerText();
-    playDegree(digit, null);
-  }
-
-  if (btnEarNew) {
-    btnEarNew.addEventListener("click", () => {
-      if (isPlayingQuestion) return;
-      const seq = generateQuestion(earDifficulty);
-      setEarQuestion(seq);
-      playQuestionSequence(0);
-    });
-  }
-
-  if (btnEarReplay) {
-    btnEarReplay.addEventListener("click", () => {
-      if (isPlayingQuestion) return;
-      if (!earQuestion || earQuestion.length === 0) {
-        earStatus.textContent = "目前沒有題目，請先按「出題」。";
-        return;
+    function updateEarAnswerText() {
+      if (earAnswer.length === 0) {
+        earAnswerTextSpan.textContent = "（尚未作答）";
+      } else {
+        earAnswerTextSpan.textContent = earAnswer.join(" - ");
       }
-      playQuestionSequence(0);
-    });
-  }
+    }
 
-  if (btnEarClear) {
-    btnEarClear.addEventListener("click", () => {
+    function setEarQuestion(seq) {
+      earQuestion = seq.slice();
+      earQuestionLenSpan.textContent = String(earQuestion.length);
+      earStatus.textContent = "題目已出，先聽清楚再作答。可以按「再聽一次」。";
+      btnEarReplay.disabled = false;
       earAnswer = [];
       updateEarAnswerText();
-      if (earQuestion.length > 0) {
-        earStatus.textContent = "答案已清除，請重新作答。";
-      } else {
-        earStatus.textContent = "目前沒有題目，請先按「出題」。";
-      }
-    });
-  }
+      logDebug("新題目：" + earQuestion.join(", "));
+    }
 
-  if (btnEarCheck) {
-    btnEarCheck.addEventListener("click", () => {
+    function generateQuestion(len) {
+      const seq = [];
+      for (let i = 0; i < len; i++) {
+        const d = String(1 + Math.floor(Math.random() * 7));
+        seq.push(d);
+      }
+      return seq;
+    }
+
+    function playQuestionSequence(index = 0) {
+      if (!earQuestion || earQuestion.length === 0) return;
+      if (index === 0) {
+        isPlayingQuestion = true;
+        earStatus.textContent = "正在播放題目，請專心聽。";
+      }
+      if (index >= earQuestion.length) {
+        isPlayingQuestion = false;
+        earStatus.textContent = "題目播放完畢，請在鼓面或 1～7 按鈕上作答。";
+        return;
+      }
+      const d = earQuestion[index];
+      playDegree(d, null);
+      setTimeout(() => playQuestionSequence(index + 1), 650);
+    }
+
+    function addEarAnswer(digit) {
+      if (!digit || isPlayingQuestion) return;
       if (!earQuestion || earQuestion.length === 0) {
-        earStatus.textContent = "目前沒有題目，請先按「出題」。";
+        earStatus.textContent = "請先按「出題」。";
         return;
       }
-      if (earAnswer.length === 0) {
-        earStatus.textContent = "尚未作答，請在鼓面或 1～7 按鈕上輸入答案。";
-        return;
+      earAnswer.push(digit);
+      updateEarAnswerText();
+      playDegree(digit, null);
+    }
+
+    if (btnEarNew) {
+      btnEarNew.addEventListener("click", () => {
+        if (isPlayingQuestion) return;
+        const seq = generateQuestion(earDifficulty);
+        setEarQuestion(seq);
+        playQuestionSequence(0);
+      });
+    }
+    if (btnEarReplay) {
+      btnEarReplay.addEventListener("click", () => {
+        if (isPlayingQuestion) return;
+        if (!earQuestion || earQuestion.length === 0) {
+          earStatus.textContent = "目前沒有題目，請先按「出題」。";
+          return;
+        }
+        playQuestionSequence(0);
+      });
+    }
+    if (btnEarClear) {
+      btnEarClear.addEventListener("click", () => {
+        earAnswer = [];
+        updateEarAnswerText();
+        if (earQuestion.length > 0) {
+          earStatus.textContent = "答案已清除，請重新作答。";
+        } else {
+          earStatus.textContent = "目前沒有題目，請先按「出題」。";
+        }
+      });
+    }
+    if (btnEarCheck) {
+      btnEarCheck.addEventListener("click", () => {
+        if (!earQuestion || earQuestion.length === 0) {
+          earStatus.textContent = "目前沒有題目，請先按「出題」。";
+          return;
+        }
+        if (earAnswer.length === 0) {
+          earStatus.textContent = "尚未作答，請在鼓面或 1～7 按鈕上輸入答案。";
+          return;
+        }
+        const correct =
+          earAnswer.length === earQuestion.length &&
+          earAnswer.every((v, i) => v === earQuestion[i]);
+        earStatus.textContent = correct
+          ? "✅ 答對了！可以換一題或提高難度。"
+          : "❌ 再試試看！正確答案是：「" + earQuestion.join(" - ") + "」。";
+      });
+    }
+
+    // 聽寫用鼓面
+    createDrum("drum-ear", (degree) => addEarAnswer(degree));
+
+    // 聽寫下方 1～7 按鈕
+    const earButtonsRow = document.getElementById("earButtonsRow");
+    if (earButtonsRow) {
+      for (let d = 1; d <= 7; d++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "ear-digit-btn";
+        btn.textContent = String(d);
+        btn.dataset.digit = String(d);
+        btn.addEventListener("click", () => addEarAnswer(btn.dataset.digit));
+        earButtonsRow.appendChild(btn);
       }
-      const correct =
-        earAnswer.length === earQuestion.length &&
-        earAnswer.every((v, i) => v === earQuestion[i]);
-      if (correct) {
-        earStatus.textContent = "✅ 答對了！可以換一題或提高難度。";
-      } else {
-        earStatus.textContent =
-          "❌ 再試試看！正確答案是：「" + earQuestion.join(" - ") + "」。";
+    }
+
+    // 鍵盤 1～7
+    document.addEventListener("keydown", (e) => {
+      const key = e.key;
+      if (key >= "1" && key <= "7") {
+        e.preventDefault();
+        if (currentPageId === "page-ear") {
+          addEarAnswer(key);
+        } else {
+          playDegree(key, null);
+        }
       }
     });
-  }
 
-  // Page2：鼓面（用來回答）
-  createDrum("drum-ear", (degree, pad) => {
-    addEarAnswer(degree);
-  });
-
-  // Page2：1~7 按鈕
-  const earButtonsRow = document.getElementById("earButtonsRow");
-  if (earButtonsRow) {
-    for (let d = 1; d <= 7; d++) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "ear-digit-btn";
-      btn.textContent = String(d);
-      btn.dataset.digit = String(d);
-      btn.addEventListener("click", () => {
-        addEarAnswer(btn.dataset.digit);
-      });
-      earButtonsRow.appendChild(btn);
-    }
-  }
-
-  // 鍵盤 1～7：在演奏頁只發音，在聽寫頁：發音＋作答
-  document.addEventListener("keydown", (e) => {
-    const key = e.key;
-    if (key >= "1" && key <= "7") {
-      e.preventDefault();
-      if (currentPageId === "page-ear") {
-        addEarAnswer(key);
-      } else {
-        playDegree(key, null);
-      }
-    }
-  });
-
-  logDebug("App 初始化完成，版本：" + APP_VERSION);
-</script>
+    logDebug("App 初始化完成，版本：" + APP_VERSION);
+  </script>
+</body>
+</html>
