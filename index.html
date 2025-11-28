@@ -5,6 +5,20 @@
   <title>空靈鼓練習 App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+        .drum-surface {
+      position: relative;
+      width: min(560px, 80vw);
+      height: min(560px, 80vw);
+      margin: 40px auto;
+      border-radius: 50%;
+      background: #222;
+      /* 用你上傳的鼓圖當背景 */
+      background-image: url("assets/images/drum_d_layout.png");
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
+    }
+
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -797,23 +811,24 @@
   // 外圈：高音 1～7（小顆 pad-high，顯示成 1˙ 2˙ 3˙）
   // 現階段高音先用同一組 1～7 音檔，之後再換成真正的高八度
   const padLayout = [
-    // 內圈：低音 1～7
-    { degree: "1", octave: "low",  x: 50, y: 50 },
-    { degree: "2", octave: "low",  x: 50, y: 24 },
-    { degree: "3", octave: "low",  x: 70, y: 32 },
-    { degree: "4", octave: "low",  x: 70, y: 68 },
-    { degree: "5", octave: "low",  x: 50, y: 76 },
-    { degree: "6", octave: "low",  x: 30, y: 68 },
-    { degree: "7", octave: "low",  x: 30, y: 32 },
+    // 內圈：低音 1～7（中心是 1）
+    { degree: "1", x: 50, y: 52, center: true }, // 中央
 
-    // 外圈：高音 1～7
-    { degree: "1", octave: "high", x: 50, y: 10 },
-    { degree: "2", octave: "high", x: 79, y: 22 },
-    { degree: "3", octave: "high", x: 92, y: 50 },
-    { degree: "4", octave: "high", x: 79, y: 78 },
-    { degree: "5", octave: "high", x: 21, y: 78 },
-    { degree: "6", octave: "high", x:  8, y: 50 },
-    { degree: "7", octave: "high", x: 21, y: 22 },
+    { degree: "2", x: 50, y: 26 },  // 上
+    { degree: "3", x: 68, y: 34 },  // 右上
+    { degree: "4", x: 68, y: 66 },  // 右下
+    { degree: "5", x: 50, y: 74 },  // 下
+    { degree: "6", x: 32, y: 66 },  // 左下
+    { degree: "7", x: 32, y: 34 },  // 左上
+
+    // 外圈：高音 1～7（再往外一圈）
+    { degree: "1", x: 50, y: 10 },  // 高 1 在最上方
+    { degree: "2", x: 78, y: 22 },  // 高 2 右上
+    { degree: "3", x: 88, y: 50 },  // 高 3 右
+    { degree: "4", x: 78, y: 78 },  // 高 4 右下
+    { degree: "5", x: 22, y: 78 },  // 高 5 左下
+    { degree: "6", x: 12, y: 50 },  // 高 6 左
+    { degree: "7", x: 22, y: 22 },  // 高 7 左上
   ];
 
   function createDrum(containerId, onPadClick) {
@@ -1029,6 +1044,7 @@
   </script>
 </body>
 </html>
+
 
 
 
