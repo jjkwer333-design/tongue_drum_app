@@ -244,26 +244,72 @@
 }
 
          /* 鼓面按鈕：基礎樣式 */
-    .pad {
-      position: absolute;
-      width: 80px;   /* 預設給內圈用 */
-      height: 80px;
-      border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.25);
-      background: radial-gradient(circle at 30% 30%, #666 0, #333 60%, #222 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: transform 0.06s ease-out, box-shadow 0.06s ease-out, background 0.1s;
-      user-select: none;
-    }
+    /* 鼓面按鈕：只當成「隱形熱區」，用 ::before 做高亮 */
+.pad {
+  position: absolute;
+  width: 80px;             /* 內圈尺寸 */
+  height: 80px;
+  border-radius: 50%;
+  border: none;            /* 不畫邊框 */
+  background: transparent; /* 不畫實心圓，讓底圖完全露出來 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
 
-    .pad span {
-      font-size: 24px;
-      font-weight: 600;
-      text-shadow: 0 0 4px rgba(0,0,0,0.8);
-    }
+/* 內圈：低音，大顆一點 */
+.pad-low {
+  width: 90px;
+  height: 90px;
+}
+
+/* 外圈：高音，小顆一點 */
+.pad-high {
+  width: 60px;
+  height: 60px;
+}
+
+/* 真正亮起來的「光圈」用 ::before 畫 */
+.pad::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f3d36f 0, #cc8a33 60%, #7b4b15 100%);
+  box-shadow: 0 0 12px rgba(0,0,0,0.9);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.12s ease-out, transform 0.12s ease-out;
+}
+
+/* 滑過去可以微微看到位置（可依喜好調整，有需要太吵可以關掉） */
+.pad:hover::before {
+  opacity: 0.15;
+}
+
+/* 點擊時亮起 */
+.pad.active::before {
+  opacity: 0.95;
+  transform: scale(1.02);
+}
+
+
+  .pad span {
+  font-size: 24px;
+  font-weight: 600;
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
+  opacity: 0;                   /* 預設完全看不到數字 */
+  transition: opacity 0.12s;
+}
+
+/* 如果想要按下時淡淡顯示數字，可以加這兩行 */
+.pad:hover span,
+.pad.active span {
+  opacity: 0.18;                /* 若完全不要字，把這段整個刪掉也可以 */
+}
+
 
     /* 內圈：低音，大顆一點 */
     .pad-low {
@@ -789,28 +835,29 @@
       audioMap[key] = a;
     }
 
-    function playDegree(degree, padElement) {
-      const key = String(degree);
-      const audio = audioMap[key];
-      if (!audio) return;
+    function playDegree(degree, padElement, octave) {
+  const key = String(degree);
+  const audio = audioMap[key];
+  if (!audio) return;
 
-      const clone = audio.cloneNode();
-      clone.currentTime = 0;
-      clone.play();
+  const clone = audio.cloneNode();   // 每次點都複製一份新的聲音
+  clone.currentTime = 0;
+  clone.play();
 
-      if (padElement) {
-        padElement.classList.add("active");
-        setTimeout(() => padElement.classList.remove("active"), 120);
-      } else {
-        const pads = document.querySelectorAll(".pad");
-        pads.forEach((p) => {
-          if (p.dataset.degree === key) {
-            p.classList.add("active");
-            setTimeout(() => p.classList.remove("active"), 120);
-          }
-        });
+  if (padElement) {
+    padElement.classList.add("active");
+    setTimeout(() => padElement.classList.remove("active"), 120);
+  } else {
+    const pads = document.querySelectorAll(".pad");
+    pads.forEach((p) => {
+      if (p.dataset.degree === key) {
+        p.classList.add("active");
+        setTimeout(() => p.classList.remove("active"), 120);
       }
-    }
+    });
+  }
+}
+
 
     // ===== 鼓面排列（兩圈 1～7，中心是 1）=====
     // 內圈：中音 1～7（大顆）
@@ -1057,6 +1104,7 @@
   </script>
 </body>
 </html>
+
 
 
 
