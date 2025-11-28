@@ -248,7 +248,7 @@
 
     /* 內圈大圓 */
     .pad-inner {
-      width: 18%;   /* 依你說再略小一些可以再調整 */
+      width: 18%;
       height: 18%;
     }
 
@@ -267,7 +267,7 @@
       transition: opacity 0.12s;
     }
 
-    /* 如果想按下時看到淡淡數字，就留這段；若完全不要字，可以刪掉 */
+    /* 若要按下時有淡淡數字，就保留這段；要完全隱藏可刪除 */
     .pad:hover span,
     .pad.active span {
       opacity: 0.18;
@@ -815,31 +815,31 @@
       }
     }
 
-    // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
+    // ===== 鼓面點擊區：標準 D 調兩圈布局 =====
     // x, y 為鼓面上的百分比座標（0~100），以 50,50 為圓心。
     const padLayout = [
       // 中央：最低音 3（單獨一塊）
       { id: "3_low_center", degree: "3", octave: "low",  ring: "center", x: 50.0, y: 45.0 },
 
-      // 內圈：大圈（半徑約 3.7cm 對應）—— 高音1 度 / 低音
-      { id: "1_high1_10", degree: "1", octave: "high1", ring: "inner", x: 75.2, y: 35.4 }, // 內圈大, 10分
-      { id: "2_high1_57", degree: "2", octave: "high1", ring: "inner", x: 41.0, y: 22.3 }, // 內圈大, 57分
-      { id: "3_high1_3",  degree: "3", octave: "high1", ring: "inner", x: 59.0, y: 22.3 }, // 內圈大, 3分
+      // 內圈：大圈 — 高音1 度 / 低音
+      { id: "1_high1_10", degree: "1", octave: "high1", ring: "inner", x: 74.4, y: 34.1 }, // 調整：減少約 3 度
+      { id: "2_high1_57", degree: "2", octave: "high1", ring: "inner", x: 41.0, y: 20.3 }, // 調整：往上 2%
+      { id: "3_high1_3",  degree: "3", octave: "high1", ring: "inner", x: 59.0, y: 20.3 }, // 調整：往上 2%
 
-      { id: "4_low_30",   degree: "4", octave: "low",   ring: "inner", x: 50.0, y: 79.1 }, // 內圈大, 30分
-      { id: "5_low_35",   degree: "5", octave: "low",   ring: "inner", x: 35.4, y: 75.2 }, // 內圈大, 35分
-      { id: "6_low_20",   degree: "6", octave: "low",   ring: "inner", x: 75.2, y: 64.6 }, // 內圈大, 20分
-      { id: "7_low_50",   degree: "7", octave: "low",   ring: "inner", x: 24.8, y: 35.4 }, // 內圈大, 50分
+      { id: "4_low_30",   degree: "4", octave: "low",   ring: "inner", x: 50.0, y: 78.1 }, // 調整：往上 1%
+      { id: "5_low_35",   degree: "5", octave: "low",   ring: "inner", x: 44.9, y: 78.7 }, // 調整：減少約 20 度
+      { id: "6_low_20",   degree: "6", octave: "low",   ring: "inner", x: 75.2, y: 64.6 }, // 保持原本
+      { id: "7_low_50",   degree: "7", octave: "low",   ring: "inner", x: 24.8, y: 35.4 }, // 保持原本
 
-      // 外圈：小圈（半徑約 4.8cm 對應）
-      { id: "1_high2_9",  degree: "1", octave: "high2", ring: "outer", x: 80.6, y: 27.8 }, // 外圈小, 9分
-      { id: "2_high2_56", degree: "2", octave: "high2", ring: "outer", x: 34.6, y: 15.5 }, // 外圈小, 56分
-      { id: "3_high2_60", degree: "3", octave: "high2", ring: "outer", x: 50.0, y: 12.2 }, // 外圈小, 60分
+      // 外圈：小圈（保持你原本的座標不變）
+      { id: "1_high2_9",  degree: "1", octave: "high2", ring: "outer", x: 80.6, y: 27.8 },
+      { id: "2_high2_56", degree: "2", octave: "high2", ring: "outer", x: 34.6, y: 15.5 },
+      { id: "3_high2_60", degree: "3", octave: "high2", ring: "outer", x: 50.0, y: 12.2 },
 
-      { id: "4_high1_26", degree: "4", octave: "high1", ring: "outer", x: 65.4, y: 84.5 }, // 外圈小, 26分
-      { id: "5_high1_34", degree: "5", octave: "high1", ring: "outer", x: 34.6, y: 84.5 }, // 外圈小, 34分
-      { id: "6_high1_15", degree: "6", octave: "high1", ring: "outer", x: 87.8, y: 50.0 }, // 外圈小, 15分
-      { id: "7_high1_44", degree: "7", octave: "high1", ring: "outer", x: 12.4, y: 54.0 }  // 外圈小, 44分
+      { id: "4_high1_26", degree: "4", octave: "high1", ring: "outer", x: 65.4, y: 84.5 },
+      { id: "5_high1_34", degree: "5", octave: "high1", ring: "outer", x: 34.6, y: 84.5 },
+      { id: "6_high1_15", degree: "6", octave: "high1", ring: "outer", x: 87.8, y: 50.0 },
+      { id: "7_high1_44", degree: "7", octave: "high1", ring: "outer", x: 12.4, y: 54.0 }
     ];
 
     function createDrum(containerId, onPadClick) {
@@ -859,7 +859,7 @@
         pad.dataset.octave = p.octave;
 
         const span = document.createElement("span");
-        span.textContent = p.degree;   // 數字實際上幾乎看不到，只是 Debug 方便
+        span.textContent = p.degree;
         pad.appendChild(span);
 
         pad.style.left = p.x + "%";
@@ -1014,7 +1014,7 @@
       }
     }
 
-    // 建立兩個鼓面（放在所有函式定義後）
+    // 建立兩個鼓面
     createDrum("drum-play", (degree, octave, pad) => {
       playDegree(degree, pad, octave);
     });
