@@ -227,37 +227,54 @@
       margin-top: 4px;
     }
     /* 鼓面容器：改用圖片當背景 */
+/* 鼓面容器：用 D 調鼓圖片當底 */
 .drum-container {
   position: relative;
-  width: min(560px, 80vw);
-  height: min(560px, 80vw);
-  margin: 40px auto 0;
+  width: min(520px, 80vw);
+  height: min(520px, 80vw);
   border-radius: 50%;
   background-image: url("assets/images/drum_d_layout.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  box-shadow: 0 0 25px rgba(0,0,0,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+  margin: 16px auto;
 }
 
-         /* 鼓面按鈕：基礎樣式 */
-    /* 鼓面按鈕：只當成「隱形熱區」，用 ::before 做高亮 */
+/* 鼓面按鈕：預設完全透明，只留下點擊區域 */
 .pad {
   position: absolute;
-  width: 80px;             /* 內圈尺寸 */
-  height: 80px;
+  width: 18%;      /* 用百分比，跟鼓面一起縮放 */
+  height: 18%;
   border-radius: 50%;
-  border: none;            /* 不畫邊框 */
-  background: transparent; /* 不畫實心圓，讓底圖完全露出來 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 2px solid transparent;
+  background: transparent;
   cursor: pointer;
   user-select: none;
+  transition: transform 0.06s ease-out,
+              box-shadow 0.08s ease-out,
+              border-color 0.08s ease-out,
+              background 0.08s ease-out;
 }
+
+/* 內部數字文字：幾乎看不到（你要完全隱藏就改成 opacity:0） */
+.pad span {
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+  opacity: 0.08;          /* 想完全隱形就改成 0 */
+  text-shadow: 0 0 4px rgba(0,0,0,0.8);
+}
+
+/* 按下 / 滑過時才稍微亮一圈，當作有被打到的回饋 */
+.pad:hover,
+.pad.active {
+  border-color: rgba(255, 240, 190, 0.9);
+  background: radial-gradient(circle at 30% 30%, rgba(255,240,190,0.35) 0, rgba(255,190,120,0.05) 60%, transparent 100%);
+  box-shadow: 0 0 18px rgba(255, 240, 190, 0.9);
+  transform: scale(1.04);
+}
+
 
 /* 內圈：低音，大顆一點 */
 .pad-low {
@@ -859,68 +876,74 @@
 }
 
 
-    // ===== 鼓面排列（兩圈 1～7，中心是 1）=====
-    // 內圈：中音 1～7（大顆）
-    // 外圈：高音 1～7（小顆，顯示成 1˙ 2˙ 3˙）
-    const padLayout = [
-      // 內圈：中心 1
-      { degree: "1", x: 50, y: 52, octave: "mid", center: true },
+   // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
+// 說明：
+//   x, y 為在鼓面上的百分比座標（0~100）
+//   octave: "mid" 中音圈（內圈），"high" 高音圈（外圈）
+//   這版座標是依照你提供的紫色圖大致對齊過的，如果哪一格覺得還要微調，只要調 x/y 即可。
+const padLayout = [
+  // 內圈：中音 1～7（中心是 1）
+  { degree: "1", octave: "mid",  x: 50, y: 52 },  // 中央
+  { degree: "2", octave: "mid",  x: 50, y: 29 },  // 上
+  { degree: "3", octave: "mid",  x: 69, y: 36 },  // 右上
+  { degree: "4", octave: "mid",  x: 69, y: 69 },  // 右下
+  { degree: "5", octave: "mid",  x: 50, y: 78 },  // 下
+  { degree: "6", octave: "mid",  x: 31, y: 69 },  // 左下
+  { degree: "7", octave: "mid",  x: 31, y: 36 },  // 左上
 
-      // 內圈其餘 2～7（大致對應你給的示意圖位置）
-      { degree: "2", x: 50, y: 26, octave: "mid" },  // 上
-      { degree: "3", x: 68, y: 34, octave: "mid" },  // 右上
-      { degree: "4", x: 68, y: 66, octave: "mid" },  // 右下
-      { degree: "5", x: 50, y: 74, octave: "mid" },  // 下
-      { degree: "6", x: 32, y: 66, octave: "mid" },  // 左下
-      { degree: "7", x: 32, y: 34, octave: "mid" },  // 左上
+  // 外圈：高音 1～7（多一圈，貼近外圈舌片）
+  { degree: "1", octave: "high", x: 50, y: 11 },  // 高 1 最上方
+  { degree: "2", octave: "high", x: 83, y: 23 },  // 高 2 右上
+  { degree: "3", octave: "high", x: 90, y: 52 },  // 高 3 右
+  { degree: "4", octave: "high", x: 79, y: 84 },  // 高 4 右下
+  { degree: "5", octave: "high", x: 21, y: 84 },  // 高 5 左下
+  { degree: "6", octave: "high", x: 10, y: 52 },  // 高 6 左
+  { degree: "7", octave: "high", x: 17, y: 23 }   // 高 7 左上
+];
 
-      // 外圈：高音 1～7
-      { degree: "1", x: 50, y: 10, octave: "high" },  // 高 1 最上
-      { degree: "2", x: 78, y: 22, octave: "high" },  // 高 2 右上
-      { degree: "3", x: 88, y: 50, octave: "high" },  // 高 3 右
-      { degree: "4", x: 78, y: 78, octave: "high" },  // 高 4 右下
-      { degree: "5", x: 22, y: 78, octave: "high" },  // 高 5 左下
-      { degree: "6", x: 12, y: 50, octave: "high" },  // 高 6 左
-      { degree: "7", x: 22, y: 22, octave: "high" },  // 高 7 左上
-    ];
+// 建立鼓面：會依 padLayout 在指定 container 裡放透明按鈕
+function createDrum(containerId, onPadClick) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
 
-    function createDrum(containerId, onPadClick) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
+  // 先清空（避免重複建立）
+  container.innerHTML = "";
 
-      padLayout.forEach((p) => {
-        const pad = document.createElement("div");
-        pad.className = "pad";
+  padLayout.forEach((p) => {
+    const pad = document.createElement("div");
+    pad.className = "pad";
+    pad.dataset.degree = p.degree;
+    pad.dataset.octave = p.octave;
 
-        // 內圈 / 外圈大小
-        if (p.octave === "high") {
-          pad.classList.add("pad-high");
-        } else {
-          pad.classList.add("pad-low");
-        }
-        if (p.center) {
-          pad.classList.add("center");
-        }
+    const span = document.createElement("span");
+    // 如果你想在 Debug 時看得到高音的小點，可以暫時打開：
+    // span.textContent = p.octave === "high" ? p.degree + "˙" : p.degree;
+    span.textContent = p.degree;  // 但因為 CSS 幾乎透明，看起來實際上是隱藏的
+    pad.appendChild(span);
 
-        pad.dataset.degree = p.degree;
-        pad.dataset.octave = p.octave || "mid";
+    pad.style.left = p.x + "%";
+    pad.style.top = p.y + "%";
+    pad.style.transform = "translate(-50%, -50%)";
 
-        const span = document.createElement("span");
-        // 高音顯示成「1˙ 2˙ 3˙」
-        span.textContent = p.octave === "high" ? p.degree + "˙" : p.degree;
-        pad.appendChild(span);
+    pad.addEventListener("click", () => {
+      onPadClick(p.degree, p.octave, pad);
+    });
 
-        pad.style.left = p.x + "%";
-        pad.style.top = p.y + "%";
-        pad.style.transform = "translate(-50%, -50%)";
+    container.appendChild(pad);
+  });
+}
 
-        pad.addEventListener("click", () => {
-          onPadClick(p.degree, p.octave, pad);
-        });
+// Page1：自由演奏鼓面
+createDrum("drum-play", (degree, octave, pad) => {
+  // 目前高音 / 中音都用同一組音檔，之後可以再換成真正高八度檔案
+  playDegree(degree, pad, octave);
+});
 
-        container.appendChild(pad);
-      });
-    }
+// Page2：鼓面（用來回答聽寫）
+createDrum("drum-ear", (degree, octave, pad) => {
+  // 聽寫只看簡譜數字，不分高低八度
+  addEarAnswer(degree);
+});
 
     // Page1：自由演奏鼓面
     createDrum("drum-play", (degree, octave, pad) => {
@@ -1104,6 +1127,7 @@
   </script>
 </body>
 </html>
+
 
 
 
