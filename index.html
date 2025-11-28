@@ -212,7 +212,7 @@
       margin-top: 4px;
     }
 
-    /* 鼓面容器：用 D 調鼓圖片當底圖 */
+    /* 鼓面容器：用 D 調鼓圖片當底 */
     .drum-container {
       position: relative;
       width: min(520px, 80vw);
@@ -226,7 +226,7 @@
       margin: 16px auto;
     }
 
-    /* 鼓面按鈕（透明熱區） */
+    /* 鼓面按鈕：預設幾乎看不到，只留下點擊區域 */
     .pad {
       position: absolute;
       border-radius: 50%;
@@ -240,36 +240,26 @@
                   background 0.08s ease-out;
     }
 
-    /* 中心、內圈、外圈不同大小 */
-    .pad-center {
-      width: 22%;
-      height: 22%;
-    }
-    .pad-inner {
-      width: 18%;
-      height: 18%;
-    }
-    .pad-outer {
-      width: 14%;
-      height: 14%;
-    }
+    /* 三種尺寸：中心、內圈、外圈 */
+    .pad-center { width: 22%; height: 22%; }
+    .pad-inner  { width: 18%; height: 18%; }
+    .pad-outer  { width: 14%; height: 14%; }
 
-    /* 數字文字幾乎看不到，只留給 Debug 用 */
     .pad span {
       font-size: 24px;
       font-weight: 600;
       color: #fff;
-      opacity: 0;
       text-shadow: 0 0 4px rgba(0,0,0,0.8);
+      opacity: 0;         /* 正常情況完全看不到數字 */
       transition: opacity 0.12s;
     }
-    /* 若你想按下時淡淡看到數字，可保留；不想看到就整段刪掉 */
-    .pad:hover span,
-    .pad.active span {
-      opacity: 0.18;
-    }
 
-    /* 點擊 / hover 的光圈效果 */
+    /* 若想 Debug，看一下位置，就把下面註解打開 */
+    /*
+    .pad span { opacity: 0.6; }
+    */
+
+    /* 真正亮起來的光圈用 ::before 畫 */
     .pad::before {
       content: "";
       position: absolute;
@@ -281,9 +271,11 @@
       transform: scale(0.9);
       transition: opacity 0.12s ease-out, transform 0.12s ease-out;
     }
+
     .pad:hover::before {
-      opacity: 0.15;
+      opacity: 0.15;       /* 滑過去可以微微看到點擊區 */
     }
+
     .pad.active::before {
       opacity: 0.95;
       transform: scale(1.02);
@@ -572,7 +564,7 @@
       </div>
 
       <div class="sidebar-footer">
-        v0.5.0 聽寫 + Debug 版<br/>音檔：assets/drums/drum_d/
+        v0.6.0 版<br/>音檔：assets/drums/drum_d/
       </div>
     </aside>
 
@@ -583,7 +575,7 @@
           <button class="settings-btn" id="btnSettings" type="button" title="設定 / Debug">⚙</button>
         </div>
         <div class="header-sub">
-          D 調鼓面演奏 + 聽寫練習 + 手機版選單 + Debug 工具。
+          D 調 15 舌片：低音 3–7、中音 1–7、高音 1–3。鼓面演奏 + 聽寫練習。
         </div>
       </div>
 
@@ -603,13 +595,14 @@
         <div class="drum-wrapper">
           <div class="drum-container" id="drum-play"></div>
           <div class="drum-caption">
-            D 調 15 舌空靈鼓（簡化 1～7 音階）<br/>
-            點擊實物圖上的舌片位置即可發聲，支援連打與疊音。
+            紫色 D 調空靈鼓：<br/>
+            低音：3、4、5、6、7；中音：1～7；高音：1、2、3。<br/>
+            中央是低音 3，其餘 14 個按鍵依照實物位置配置。
           </div>
         </div>
         <div class="help-panel">
           🔊 每個數字代表簡譜：1=D、2=E、3=F#、4=G、5=A、6=B、7=C#<br/>
-          🖱 滑鼠點擊鼓面舌片位置可以聽音階<br/>
+          🖱 滑鼠點選鼓面任一舌片即可發音<br/>
           ⌨️ 鍵盤按 <span class="kbd">1</span>～<span class="kbd">7</span> 也可以直接發音（不分高低八度）<br/>
           📂 音檔位置：<code>assets/drums/drum_d/drumLong_*.wav</code>
         </div>
@@ -642,7 +635,7 @@
           <div class="ear-buttons" id="earButtonsRow"></div>
           <div class="ear-hint">
             👉 可以點上面的鼓面、下面的 <b>1～7</b> 按鈕，或用鍵盤按
-            <span class="kbd">1</span>～<span class="kbd">7</span> 作答（同樣不分高低八度）。
+            <span class="kbd">1</span>～<span class="kbd">7</span> 作答（目前只考簡譜，不分高低八度）。
           </div>
         </div>
       </section>
@@ -666,7 +659,7 @@
       </section>
 
       <div class="footer">
-        v0.5.0：鼓面 + 手機版選單 + 聽寫練習 + 設定 / Debug / 浮動預覽鈕。
+        v0.6.0：15 舌片精準布局 + 手機版選單 + 聽寫練習 + 設定 / Debug / 浮動預覽鈕。
       </div>
     </main>
   </div>
@@ -689,7 +682,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "0.5.0";
+    const APP_VERSION = "0.6.0";
 
     // --- 左側選單切換 ---
     const navButtons = document.querySelectorAll(".nav-btn");
@@ -793,74 +786,74 @@
       const audio = audioMap[key];
       if (!audio) return;
 
-      // cloneNode 支援連打 / 疊音，不會被前一個 audio 中斷
+      // 支援連打：每次複製一份
       const clone = audio.cloneNode();
       clone.currentTime = 0;
       clone.play();
 
-      const activatePad = (pad) => {
-        if (!pad) return;
-        pad.classList.add("active");
-        setTimeout(() => pad.classList.remove("active"), 120);
-      };
-
       if (padElement) {
-        activatePad(padElement);
+        padElement.classList.add("active");
+        setTimeout(() => padElement.classList.remove("active"), 120);
       } else {
         const pads = document.querySelectorAll(".pad");
         pads.forEach((p) => {
-          if (p.dataset.degree === key) activatePad(p);
+          if (p.dataset.degree === key) {
+            p.classList.add("active");
+            setTimeout(() => p.classList.remove("active"), 120);
+          }
         });
       }
     }
 
-    // ===== 鼓面點擊區：標準 D 調 15 音布局 =====
-    // 座標以中心 (50,50) 為原點，依你提供：
-    // 內圈半徑 4cm、外圈 5.5cm 轉成比例後得到 r_inner ≈31.5%、r_outer ≈43.3%
-    // 時鐘角度換算後得到下面這組座標。
+    // ===== 鼓面點擊區：標準 D 調 15 舌片布局 =====
+    // 中心在 (50,50)，半徑 50。
+    // 內圈半徑約 4cm → 32%（相對整個鼓面直徑）；外圈半徑約 5.5cm → 44%。
+    // 分鐘 → 角度：1 分 = 6 度。
 
     const padLayout = [
-      // 中央：低音 3（最大舌片）
+      // 中央：低音 3（最大那片）
       { id: "3_low_center", degree: "3", octave: "low",  ring: "center", x: 50.0, y: 45.0 },
 
-      // 內圈：大圈（半徑約 4cm 對應）—— 高音1 度 / 低音（依你描述）
-      { id: "1_mid_2_30", degree: "1", octave: "high1", ring: "inner",  x: 80.4, y: 41.8 }, // 內圈大, 2點半
-      { id: "2_mid_11",   degree: "2", octave: "high1", ring: "inner",  x: 34.3, y: 22.7 }, // 內圈大, 11點
-      { id: "3_mid_1",    degree: "3", octave: "high1", ring: "inner",  x: 65.7, y: 22.7 }, // 內圈大, 1點
-      { id: "4_low_6",    degree: "4", octave: "low",   ring: "inner",  x: 50.0, y: 81.5 }, // 內圈大, 6點
-      { id: "5_low_8",    degree: "5", octave: "low",   ring: "inner",  x: 22.7, y: 65.7 }, // 內圈大, 8點
-      { id: "6_low_4",    degree: "6", octave: "low",   ring: "inner",  x: 77.3, y: 65.7 }, // 內圈大, 4點
-      { id: "7_low_10",   degree: "7", octave: "low",   ring: "inner",  x: 22.7, y: 34.3 }, // 內圈大, 10點
+      // 內圈：大圈（半徑約 4cm） — 混合中音 1~3 / 低音 4~7
+      { id: "1_mid_13", degree: "1", octave: "mid",  ring: "inner", x: 81.3, y: 43.3 }, // 13分
+      { id: "2_mid_55", degree: "2", octave: "mid",  ring: "inner", x: 34.0, y: 22.3 }, // 55分
+      { id: "3_mid_5",  degree: "3", octave: "mid",  ring: "inner", x: 66.0, y: 22.3 }, // 5分
+      { id: "4_low_30", degree: "4", octave: "low",  ring: "inner", x: 50.0, y: 82.0 }, // 30分
+      { id: "5_low_40", degree: "5", octave: "low",  ring: "inner", x: 22.3, y: 66.0 }, // 40分
+      { id: "6_low_20", degree: "6", octave: "low",  ring: "inner", x: 77.7, y: 66.0 }, // 20分
+      { id: "7_low_47", degree: "7", octave: "low",  ring: "inner", x: 18.7, y: 43.3 }, // 47分
 
-      // 外圈：小圈（半徑約 5.5cm 對應）
-      { id: "1_high2_2_30", degree: "1", octave: "high2", ring: "outer", x: 91.8, y: 38.8 }, // 外圈小, 2點半
-      { id: "2_high2_11",   degree: "2", octave: "high2", ring: "outer", x: 28.3, y: 12.5 }, // 外圈小, 11點
-      { id: "3_high2_1",    degree: "3", octave: "high2", ring: "outer", x: 71.7, y: 12.5 }, // 外圈小, 1點
-      { id: "4_high1_5",    degree: "4", octave: "high1", ring: "outer", x: 71.7, y: 87.5 }, // 外圈小, 5點
-      { id: "5_high1_7",    degree: "5", octave: "high1", ring: "outer", x: 28.3, y: 87.5 }, // 外圈小, 7點
-      { id: "6_high1_3_30", degree: "6", octave: "high1", ring: "outer", x: 91.8, y: 61.2 }, // 外圈小, 3點半
-      { id: "7_high1_8_30", degree: "7", octave: "high1", ring: "outer", x: 8.2,  y: 61.2 }  // 外圈小, 8點半
+      // 外圈：小圈（半徑約 5.5cm） — 高音 1~3 + 中音 4~7
+      { id: "1_high_10", degree: "1", octave: "high", ring: "outer", x: 88.1, y: 28.0 }, // 10分
+      { id: "2_high_50", degree: "2", octave: "high", ring: "outer", x: 11.9, y: 28.0 }, // 50分
+      { id: "3_high_60", degree: "3", octave: "high", ring: "outer", x: 50.0, y:  6.0 }, // 60分 = 12點
+      { id: "4_mid_24", degree: "4", octave: "mid",  ring: "outer", x: 75.9, y: 85.6 }, // 24分
+      { id: "5_mid_36", degree: "5", octave: "mid",  ring: "outer", x: 24.1, y: 85.6 }, // 36分
+      { id: "6_mid_17", degree: "6", octave: "mid",  ring: "outer", x: 93.0, y: 59.1 }, // 17分
+      { id: "7_mid_43", degree: "7", octave: "mid",  ring: "outer", x:  7.0, y: 59.1 }  // 43分
     ];
 
+    // 建立鼓面：依 padLayout 在指定 container 裡放透明按鈕
     function createDrum(containerId, onPadClick) {
       const container = document.getElementById(containerId);
       if (!container) return;
 
       container.innerHTML = "";
 
-      padLayout.forEach(p => {
+      padLayout.forEach((p) => {
         const pad = document.createElement("div");
         pad.classList.add("pad");
-
         if (p.ring === "center") pad.classList.add("pad-center");
         else if (p.ring === "inner") pad.classList.add("pad-inner");
-        else pad.classList.add("pad-outer");
+        else if (p.ring === "outer") pad.classList.add("pad-outer");
 
+        pad.dataset.id = p.id;
         pad.dataset.degree = p.degree;
-        pad.dataset.octave = p.octave || "";
+        pad.dataset.octave = p.octave;
+        pad.dataset.ring = p.ring;
 
         const span = document.createElement("span");
-        span.textContent = p.degree;   // 數字幾乎看不到，只供 Debug
+        span.textContent = p.degree;   // 數字被 CSS 隱形，方便之後要 Debug
         pad.appendChild(span);
 
         pad.style.left = p.x + "%";
@@ -878,6 +871,11 @@
     // Page1：自由演奏鼓面
     createDrum("drum-play", (degree, octave, pad) => {
       playDegree(degree, pad, octave);
+    });
+
+    // Page2：鼓面（用來回答聽寫，只看簡譜數字）
+    createDrum("drum-ear", (degree, octave, pad) => {
+      addEarAnswer(degree);
     });
 
     // --- 聽寫練習 ---
@@ -1008,11 +1006,6 @@
           : "❌ 再試試看！正確答案是：「" + earQuestion.join(" - ") + "」。";
       });
     }
-
-    // 聽寫頁面的鼓面
-    createDrum("drum-ear", (degree, octave, pad) => {
-      addEarAnswer(degree);
-    });
 
     // 聽寫下方 1～7 按鈕
     const earButtonsRow = document.getElementById("earButtonsRow");
