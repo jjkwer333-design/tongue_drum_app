@@ -5,19 +5,20 @@
   <title>空靈鼓練習 App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-        .drum-surface {
+         .drum-surface {
       position: relative;
       width: min(560px, 80vw);
       height: min(560px, 80vw);
       margin: 40px auto;
       border-radius: 50%;
-      background: #222;
-      /* 用你上傳的鼓圖當背景 */
+      /* 改成用你的 D 調鼓圖片當底圖 */
       background-image: url("assets/images/drum_d_layout.png");
       background-size: cover;
       background-position: center;
+      background-repeat: no-repeat;
       box-shadow: 0 0 40px rgba(0,0,0,0.8);
     }
+
 
     * { box-sizing: border-box; }
     body {
@@ -810,9 +811,10 @@
   // 內圈：低音 1～7（大顆 pad-low）
   // 外圈：高音 1～7（小顆 pad-high，顯示成 1˙ 2˙ 3˙）
   // 現階段高音先用同一組 1～7 音檔，之後再換成真正的高八度
+    // ===== 鼓面排列（兩圈 1～7，中心是 1）=====
   const padLayout = [
-    // 內圈：低音 1～7（中心是 1）
-    { degree: "1", x: 50, y: 52, center: true }, // 中央
+    // 內圈：中音 1～7（中心 1）
+    { degree: "1", x: 50, y: 52, center: true }, // 中央主音
 
     { degree: "2", x: 50, y: 26 },  // 上
     { degree: "3", x: 68, y: 34 },  // 右上
@@ -830,6 +832,7 @@
     { degree: "6", x: 12, y: 50 },  // 高 6 左
     { degree: "7", x: 22, y: 22 },  // 高 7 左上
   ];
+
 
   function createDrum(containerId, onPadClick) {
     const container = document.getElementById(containerId);
@@ -1044,6 +1047,7 @@
   </script>
 </body>
 </html>
+
 
 
 
