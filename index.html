@@ -852,8 +852,18 @@
   }
 
 
-    // Page1 鼓面
-    createDrum("drum-play", (degree, pad) => playDegree(degree, pad));
+    // Page1：自由演奏鼓面
+  createDrum("drum-play", (degree, octave, pad) => {
+    // 目前先忽略 octave，只是傳進去保留
+    playDegree(degree, pad, octave);
+  });
+
+  // Page2：鼓面（用來回答聽寫）
+  createDrum("drum-ear", (degree, octave, pad) => {
+    // 聽寫只看簡譜數字，不分高低八度
+    addEarAnswer(degree);
+  });
+
 
     // --- 聽寫練習 ---
     const earLevelBtns = document.querySelectorAll(".ear-level-btn");
@@ -1018,6 +1028,7 @@
   </script>
 </body>
 </html>
+
 
 
 
