@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>空靈鼓練習 App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     * {
       box-sizing: border-box;
@@ -20,26 +21,52 @@
       min-height: 100vh;
     }
 
-    /* ---- 左側 Sidebar ---- */
+    /* ---- 左側 / 上方 Sidebar ---- */
     .sidebar {
-      width: 210px;
+      width: 230px;
       background: linear-gradient(180deg, #191919 0%, #101010 100%);
       border-right: 1px solid #333;
       display: flex;
       flex-direction: column;
-      padding: 16px 12px;
-      gap: 12px;
+      padding: 14px 12px;
+      gap: 10px;
     }
+
+    .sidebar-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
     .sidebar-title {
       font-size: 16px;
       font-weight: 600;
-      margin-bottom: 4px;
     }
     .sidebar-sub {
       font-size: 11px;
       color: #aaa;
-      margin-bottom: 12px;
+      margin-top: 2px;
     }
+
+    .mobile-menu-toggle {
+      display: none; /* 桌機隱藏，手機才顯示 */
+      border-radius: 8px;
+      border: 1px solid #555;
+      background: #181818;
+      color: #eee;
+      font-size: 14px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
     .nav-btn {
       padding: 8px 10px;
       border-radius: 8px;
@@ -54,17 +81,51 @@
       gap: 8px;
       transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.05s;
     }
+
     .nav-btn span.icon {
       font-size: 16px;
     }
+
     .nav-btn:hover {
       background: rgba(255,255,255,0.04);
     }
+
     .nav-btn.active {
       background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
       color: #1a1a1a;
       border-color: #f9e7af;
       transform: translateX(1px);
+    }
+
+    .external-link-box {
+      margin-top: 4px;
+      padding: 7px 7px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: radial-gradient(circle at 0 0, #333 0, #181818 55%, #101010 100%);
+      font-size: 12px;
+      color: #ddd;
+    }
+    .external-link-title {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 3px;
+    }
+    .external-link-btn {
+      display: inline-block;
+      margin-top: 3px;
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: 1px solid #f5d36f;
+      background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
+      color: #181818;
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .external-link-btn:hover {
+      filter: brightness(1.05);
     }
 
     .sidebar-footer {
@@ -76,14 +137,10 @@
     /* ---- 右側主畫面 ---- */
     .main-area {
       flex: 1;
-      padding: 18px 22px;
+      padding: 18px 20px;
       display: flex;
       flex-direction: column;
       gap: 10px;
-    }
-
-    .header {
-      margin-bottom: 4px;
     }
 
     .header h1 {
@@ -113,23 +170,30 @@
       gap: 12px;
     }
 
+    .drum-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
     .drum-container {
       position: relative;
-      width: 420px;
-      height: 420px;
+      width: min(480px, 76vw);
+      height: min(480px, 76vw);
       border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #444 0, #222 40%, #111 100%);
+      background: radial-gradient(circle at 30% 25%, #444 0, #222 40%, #111 100%);
       box-shadow: 0 0 25px rgba(0,0,0,0.7);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 8px;
     }
 
     .pad {
       position: absolute;
-      width: 70px;
-      height: 70px;
+      width: 78px;
+      height: 78px;
       border-radius: 50%;
       border: 2px solid rgba(255,255,255,0.25);
       background: radial-gradient(circle at 30% 30%, #666 0, #333 60%, #222 100%);
@@ -142,9 +206,14 @@
     }
 
     .pad span {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 600;
       text-shadow: 0 0 4px rgba(0,0,0,0.8);
+    }
+
+    .pad.center {
+      width: 95px;
+      height: 95px;
     }
 
     .pad.active {
@@ -153,21 +222,11 @@
       background: radial-gradient(circle at 30% 30%, #f5d37a 0, #c98b35 60%, #7c4b15 100%);
     }
 
-    .center-label {
-      position: absolute;
-      text-align: center;
-      font-size: 13px;
-      color: #ddd;
-      opacity: 0.9;
-      pointer-events: none;
-    }
-
-    .help-panel {
+    .drum-caption {
       font-size: 13px;
       color: #ddd;
       text-align: center;
-      line-height: 1.6;
-      max-width: 520px;
+      line-height: 1.5;
     }
 
     .kbd {
@@ -181,7 +240,138 @@
       margin: 0 2px;
     }
 
-    /* ---- Page2 / Page3 / Page4 預備版面 ---- */
+    .help-panel {
+      font-size: 13px;
+      color: #ddd;
+      text-align: center;
+      line-height: 1.6;
+      max-width: 520px;
+    }
+
+    /* ---- Page2：聽寫練習 ---- */
+    .page-ear {
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .ear-controls {
+      max-width: 640px;
+      width: 100%;
+      background: rgba(0,0,0,0.35);
+      border-radius: 12px;
+      border: 1px solid #333;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+
+    .ear-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .ear-label {
+      font-size: 13px;
+      color: #ddd;
+      margin-right: 4px;
+    }
+
+    .ear-level-btn {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #666;
+      background: #222;
+      color: #eee;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .ear-level-btn.active {
+      border-color: #f5d36f;
+      background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
+      color: #181818;
+    }
+
+    .ear-main-btn {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #666;
+      background: #222;
+      color: #eee;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .ear-main-btn.primary {
+      border-color: #f5d36f;
+      background: linear-gradient(90deg, #f3d36f 0%, #cc8a33 60%, #7b4b15 100%);
+      color: #181818;
+    }
+    .ear-main-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .ear-status {
+      font-size: 13px;
+      color: #f0e6b2;
+      margin-top: 2px;
+    }
+
+    .ear-answer {
+      font-size: 13px;
+      color: #ddd;
+      margin-top: 4px;
+      line-height: 1.6;
+    }
+
+    .ear-answer span {
+      font-weight: 500;
+      color: #f3d36f;
+    }
+
+    .ear-input-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .ear-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .ear-digit-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      border: 1px solid #666;
+      background: #222;
+      color: #eee;
+      font-size: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ear-digit-btn:hover {
+      border-color: #f5d36f;
+    }
+
+    .ear-hint {
+      font-size: 11px;
+      color: #aaa;
+      text-align: center;
+    }
+
+    /* ---- 其他頁先放說明 ---- */
     .placeholder {
       font-size: 14px;
       color: #ccc;
@@ -212,60 +402,110 @@
       text-align: right;
     }
 
+    /* ---- 手機版 RWD ---- */
     @media (max-width: 900px) {
       .app-shell {
         flex-direction: column;
       }
       .sidebar {
         width: 100%;
-        flex-direction: row;
-        align-items: center;
-        overflow-x: auto;
+        border-right: none;
+        border-bottom: 1px solid #333;
+        padding: 10px 12px;
       }
-      .sidebar-footer {
+      .mobile-menu-toggle {
+        display: inline-block;
+      }
+      .sidebar-sub {
         display: none;
       }
-      .nav-btn {
-        white-space: nowrap;
+      .sidebar-nav {
+        display: none;             /* 收合狀態 */
+        margin-top: 8px;
+      }
+      .sidebar-nav.open {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
       }
       .main-area {
         padding: 12px;
       }
-      .drum-container {
-        width: 320px;
-        height: 320px;
+      .help-panel {
+        font-size: 12px;
+        padding: 0 4px;
       }
       .pad {
-        width: 58px;
-        height: 58px;
+        width: 68px;
+        height: 68px;
+      }
+      .pad.center {
+        width: 86px;
+        height: 86px;
+      }
+      .ear-controls {
+        font-size: 12px;
+      }
+      .ear-answer {
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .drum-container {
+        width: min(420px, 84vw);
+        height: min(420px, 84vw);
+      }
+      .pad {
+        width: 62px;
+        height: 62px;
+      }
+      .pad.center {
+        width: 80px;
+        height: 80px;
       }
     }
   </style>
 </head>
 <body>
   <div class="app-shell">
-    <!-- 左側選單 -->
+    <!-- Sidebar：桌機在左，手機在上方 -->
     <aside class="sidebar">
-      <div>
-        <div class="sidebar-title">空靈鼓練習 App</div>
-        <div class="sidebar-sub">選擇你要的模式</div>
+      <div class="sidebar-header-row">
+        <div>
+          <div class="sidebar-title">空靈鼓練習 App</div>
+          <div class="sidebar-sub">選擇你要的模式</div>
+        </div>
+        <button class="mobile-menu-toggle" type="button">☰ 選單</button>
       </div>
 
-      <button class="nav-btn active" data-page="page-play">
-        <span class="icon">🥁</span> 空靈鼓演奏器
-      </button>
-      <button class="nav-btn" data-page="page-ear">
-        <span class="icon">👂</span> 聽寫練習
-      </button>
-      <button class="nav-btn" data-page="page-melody">
-        <span class="icon">🎵</span> 自動旋律
-      </button>
-      <button class="nav-btn" data-page="page-chord">
-        <span class="icon">🎹</span> 和弦伴奏器
-      </button>
+      <!-- 這一塊會在手機版被收合 / 展開 -->
+      <div class="sidebar-nav" id="sidebarNav">
+        <button class="nav-btn active" data-page="page-play">
+          <span class="icon">🥁</span> 空靈鼓演奏器
+        </button>
+        <button class="nav-btn" data-page="page-ear">
+          <span class="icon">👂</span> 聽寫練習
+        </button>
+        <button class="nav-btn" data-page="page-melody">
+          <span class="icon">🎵</span> 自動旋律
+        </button>
+        <button class="nav-btn" data-page="page-chord">
+          <span class="icon">🎹</span> 和弦伴奏器
+        </button>
+
+        <div class="external-link-box">
+          <div class="external-link-title">其他練習工具</div>
+          <a class="external-link-btn"
+             href="http://127.0.0.1:7860"
+             target="_blank">
+            🎧 開啟聽音辨識練習（Gradio）
+          </a>
+        </div>
+      </div>
 
       <div class="sidebar-footer">
-        v0.2 正式結構版<br />
+        v0.4 聽寫練習版<br />
         音檔路徑：assets/drums/drum_d/
       </div>
     </aside>
@@ -275,15 +515,17 @@
       <div class="header">
         <h1>空靈鼓練習 App</h1>
         <div class="header-sub">
-          左側切換模式，目前「空靈鼓演奏器」已完成，音檔來自 D 調：assets/drums/drum_d/
+          已完成：D 調鼓面演奏 + 聽寫練習 + 手機版選單。接下來可加入自動旋律與和弦伴奏。
         </div>
       </div>
 
       <!-- Page 1：空靈鼓演奏器 -->
       <section id="page-play" class="page page-play active">
-        <div class="drum-container" id="drum">
-          <div class="center-label" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">
-            D 調空靈鼓<br />簡譜 1～7（單音自由彈奏）
+        <div class="drum-wrapper">
+          <div class="drum-container" id="drum-play"></div>
+          <div class="drum-caption">
+            D 調空靈鼓（簡化 1～7 音階）<br />
+            中央「1」為主音，外圈 2～7 以接近真實空靈鼓的排列方式環繞配置。
           </div>
         </div>
 
@@ -295,67 +537,90 @@
         </div>
       </section>
 
-      <!-- Page 2：聽寫練習（先放預備區） -->
-      <section id="page-ear" class="page">
-        <div class="placeholder">
-          <div class="placeholder-tag">下一步要做的</div>
-          <div class="placeholder-title">👂 聽寫練習（Melody Ear Training）</div>
-          <p>
-            這一頁之後會變成：<br />
-            ・按「出題」自動播放 2～4 個音的旋律<br />
-            ・你在鼓面上按出你聽到的簡譜<br />
-            ・系統告訴你「答對 / 答錯」，並顯示正確答案<br />
-            ・可以選擇難度：2 音、3 音、4 音、加上和弦題目等<br />
-          </p>
+      <!-- Page 2：聽寫練習 -->
+      <section id="page-ear" class="page page-ear">
+        <div class="ear-controls">
+          <div class="ear-row">
+            <span class="ear-label">🎯 難度：</span>
+            <button class="ear-level-btn" data-len="2">2 音</button>
+            <button class="ear-level-btn active" data-len="3">3 音</button>
+            <button class="ear-level-btn" data-len="4">4 音</button>
+          </div>
+          <div class="ear-row">
+            <button id="btnEarNew" class="ear-main-btn primary">出題</button>
+            <button id="btnEarReplay" class="ear-main-btn" disabled>再聽一次</button>
+            <button id="btnEarClear" class="ear-main-btn">清除答案</button>
+            <button id="btnEarCheck" class="ear-main-btn">送出答案</button>
+          </div>
+          <div class="ear-status" id="earStatus">按「出題」開始，題目會播放 2～4 個音。</div>
+          <div class="ear-answer">
+            題目音數：<span id="earQuestionLen">-</span><br />
+            你的答案：<span id="earAnswerText">（尚未作答）</span>
+          </div>
+        </div>
+
+        <div class="ear-input-area">
+          <div class="drum-container" id="drum-ear"></div>
+          <div class="ear-buttons" id="earButtonsRow">
+            <!-- 1~7 按鈕 JS 產生 -->
+          </div>
+          <div class="ear-hint">
+            👉 可以點上面的鼓面、下面的 <b>1～7</b> 按鈕，或用鍵盤按 <span class="kbd">1</span>～<span class="kbd">7</span> 作答。
+          </div>
         </div>
       </section>
 
-      <!-- Page 3：自動旋律（先放預備區） -->
+      <!-- Page 3：自動旋律（預留） -->
       <section id="page-melody" class="page">
         <div class="placeholder">
           <div class="placeholder-tag">之後要加入</div>
           <div class="placeholder-title">🎵 自動旋律生成（D 調手碟風格）</div>
           <p>
-            這一頁之後會可以：<br />
+            未來這一頁會：<br />
             ・按一個按鈕，系統自動彈一段 D 調空靈鼓旋律<br />
             ・可以選擇風格：療癒 / 冥想 / 開朗 / 濃烈<br />
-            ・可以設定長度：4 音、8 音、16 音<br />
+            ・可以設定長度：4 音、8 音、16 音…<br />
           </p>
         </div>
       </section>
 
-      <!-- Page 4：和弦伴奏器（先放預備區） -->
+      <!-- Page 4：和弦伴奏器（預留） -->
       <section id="page-chord" class="page">
         <div class="placeholder">
           <div class="placeholder-tag">進階功能</div>
           <div class="placeholder-title">🎹 和弦伴奏器（Chord Progression）</div>
           <p>
-            未來這個頁面會：<br />
-            ・讓你選擇常見和弦進行（I–V–vi–IV 等）<br />
-            ・循環播放你剛剛生成的空靈鼓和弦 wav<br />
-            ・你可以在「演奏器」那頁跟著一起彈旋律<br />
+            之後可以選擇常見和弦進行（I–V–vi–IV 等），<br />
+            自動循環播放和弦音色，讓你用空靈鼓在上面自由即興。<br />
           </p>
         </div>
       </section>
 
       <div class="footer">
-        v0.2：已完成「圓形演奏器 + 左側選單 + 專案路徑規劃」。下一步要實作「聽寫練習」。
+        v0.4：鼓面 + 手機版選單 + 聽寫練習（2/3/4 音題目 + 鼓面 & 按鈕作答）。
       </div>
     </main>
   </div>
 
   <script>
-    // --- 左側選單：切換頁面 ---
+    // ---- 左側選單：切換頁面 ----
     const navButtons = document.querySelectorAll(".nav-btn");
     const pages = document.querySelectorAll(".page");
+    const sidebarNav = document.getElementById("sidebarNav");
+    const mobileToggle = document.querySelector(".mobile-menu-toggle");
+    let currentPageId = "page-play";
 
     function showPage(pageId) {
+      currentPageId = pageId;
       pages.forEach(p => {
         p.classList.toggle("active", p.id === pageId);
       });
       navButtons.forEach(btn => {
         btn.classList.toggle("active", btn.dataset.page === pageId);
       });
+      if (window.innerWidth <= 900) {
+        sidebarNav.classList.remove("open");
+      }
     }
 
     navButtons.forEach(btn => {
@@ -365,9 +630,13 @@
       });
     });
 
-    // --- Page1：演奏器 ---
+    if (mobileToggle) {
+      mobileToggle.addEventListener("click", () => {
+        sidebarNav.classList.toggle("open");
+      });
+    }
 
-    // 設定 7 個簡譜對應的音檔（已改成正式路徑）
+    // ---- 通用音檔設定 ----
     const audioFiles = {
       "1": "assets/drums/drum_d/drumLong_1.wav",
       "2": "assets/drums/drum_d/drumLong_2.wav",
@@ -378,7 +647,6 @@
       "7": "assets/drums/drum_d/drumLong_7.wav",
     };
 
-    // 建立 Audio 物件，預先載入
     const audioMap = {};
     for (let d = 1; d <= 7; d++) {
       const key = String(d);
@@ -387,42 +655,40 @@
       audioMap[key] = a;
     }
 
-    const drum = document.getElementById("drum");
-
-    const pads = [
-      { degree: "1", angleDeg: -90 },  // 上方
-      { degree: "2", angleDeg: -38 },
-      { degree: "3", angleDeg: 16 },
-      { degree: "4", angleDeg: 70 },
-      { degree: "5", angleDeg: 132 },
-      { degree: "6", angleDeg: 180 },
-      { degree: "7", angleDeg: -152 },
+    // ---- 建立鼓面（共用排列） ----
+    const padLayout = [
+      { degree: "1", x: 50, y: 50, center: true },
+      { degree: "2", x: 50, y: 12 },
+      { degree: "3", x: 82, y: 28 },
+      { degree: "4", x: 82, y: 68 },
+      { degree: "5", x: 50, y: 88 },
+      { degree: "6", x: 18, y: 68 },
+      { degree: "7", x: 18, y: 28 },
     ];
 
-    const radiusPercent = 38;
+    function createDrum(containerId, onPadClick) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      padLayout.forEach(p => {
+        const pad = document.createElement("div");
+        pad.className = "pad" + (p.center ? " center" : "");
+        pad.dataset.degree = p.degree;
 
-    pads.forEach((p) => {
-      const pad = document.createElement("div");
-      pad.className = "pad";
-      pad.dataset.degree = p.degree;
-      const span = document.createElement("span");
-      span.textContent = p.degree;
-      pad.appendChild(span);
+        const span = document.createElement("span");
+        span.textContent = p.degree;
+        pad.appendChild(span);
 
-      const rad = (p.angleDeg * Math.PI) / 180;
-      const cx = 50 + radiusPercent * Math.cos(rad);
-      const cy = 50 + radiusPercent * Math.sin(rad);
+        pad.style.left = p.x + "%";
+        pad.style.top = p.y + "%";
+        pad.style.transform = "translate(-50%, -50%)";
 
-      pad.style.left = cx + "%";
-      pad.style.top = cy + "%";
-      pad.style.transform = "translate(-50%, -50%)";
+        pad.addEventListener("click", () => {
+          onPadClick(p.degree, pad);
+        });
 
-      pad.addEventListener("click", () => {
-        playDegree(p.degree, pad);
+        container.appendChild(pad);
       });
-
-      drum.appendChild(pad);
-    });
+    }
 
     function playDegree(degree, padElement) {
       const key = String(degree);
@@ -435,9 +701,7 @@
 
       if (padElement) {
         padElement.classList.add("active");
-        setTimeout(() => {
-          padElement.classList.remove("active");
-        }, 120);
+        setTimeout(() => padElement.classList.remove("active"), 120);
       } else {
         const pads = document.querySelectorAll(".pad");
         pads.forEach(p => {
@@ -449,12 +713,168 @@
       }
     }
 
-    // 鍵盤事件：按 1～7 發音
+    // Page1：自由演奏鼓面
+    createDrum("drum-play", (degree, pad) => {
+      playDegree(degree, pad);
+    });
+
+    // ---- Page2：聽寫練習 ----
+    const earLevelBtns = document.querySelectorAll(".ear-level-btn");
+    const btnEarNew = document.getElementById("btnEarNew");
+    const btnEarReplay = document.getElementById("btnEarReplay");
+    const btnEarClear = document.getElementById("btnEarClear");
+    const btnEarCheck = document.getElementById("btnEarCheck");
+    const earStatus = document.getElementById("earStatus");
+    const earQuestionLenSpan = document.getElementById("earQuestionLen");
+    const earAnswerTextSpan = document.getElementById("earAnswerText");
+
+    let earDifficulty = 3;
+    let earQuestion = [];
+    let earAnswer = [];
+    let isPlayingQuestion = false;
+
+    earLevelBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        earLevelBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        earDifficulty = parseInt(btn.dataset.len, 10) || 3;
+        if (earQuestion.length === 0) {
+          earStatus.textContent = `已選擇題目長度：${earDifficulty} 音。按「出題」開始。`;
+        }
+      });
+    });
+
+    function updateEarAnswerText() {
+      if (earAnswer.length === 0) {
+        earAnswerTextSpan.textContent = "（尚未作答）";
+      } else {
+        earAnswerTextSpan.textContent = earAnswer.join(" - ");
+      }
+    }
+
+    function setEarQuestion(seq) {
+      earQuestion = seq.slice();
+      earQuestionLenSpan.textContent = String(earQuestion.length);
+      earStatus.textContent = "題目已出，先聽清楚再作答。可以按「再聽一次」。";
+      btnEarReplay.disabled = false;
+      earAnswer = [];
+      updateEarAnswerText();
+    }
+
+    function generateQuestion(len) {
+      const seq = [];
+      for (let i = 0; i < len; i++) {
+        const d = String(1 + Math.floor(Math.random() * 7));
+        seq.push(d);
+      }
+      return seq;
+    }
+
+    function playQuestionSequence(index = 0) {
+      if (!earQuestion || earQuestion.length === 0) return;
+      if (index === 0) {
+        isPlayingQuestion = true;
+        earStatus.textContent = "正在播放題目，請專心聽。";
+      }
+      if (index >= earQuestion.length) {
+        isPlayingQuestion = false;
+        earStatus.textContent = "題目播放完畢，請在鼓面或 1～7 按鈕上作答。";
+        return;
+      }
+      const d = earQuestion[index];
+      playDegree(d, null);
+      setTimeout(() => playQuestionSequence(index + 1), 650);
+    }
+
+    function addEarAnswer(digit) {
+      if (!digit) return;
+      if (isPlayingQuestion) return;
+      if (!earQuestion || earQuestion.length === 0) {
+        earStatus.textContent = "請先按「出題」。";
+        return;
+      }
+      earAnswer.push(digit);
+      updateEarAnswerText();
+      playDegree(digit, null);
+    }
+
+    btnEarNew.addEventListener("click", () => {
+      if (isPlayingQuestion) return;
+      const seq = generateQuestion(earDifficulty);
+      setEarQuestion(seq);
+      playQuestionSequence(0);
+    });
+
+    btnEarReplay.addEventListener("click", () => {
+      if (isPlayingQuestion) return;
+      if (!earQuestion || earQuestion.length === 0) {
+        earStatus.textContent = "目前沒有題目，請先按「出題」。";
+        return;
+      }
+      playQuestionSequence(0);
+    });
+
+    btnEarClear.addEventListener("click", () => {
+      earAnswer = [];
+      updateEarAnswerText();
+      if (earQuestion.length > 0) {
+        earStatus.textContent = "答案已清除，請重新作答。";
+      } else {
+        earStatus.textContent = "目前沒有題目，請先按「出題」。";
+      }
+    });
+
+    btnEarCheck.addEventListener("click", () => {
+      if (!earQuestion || earQuestion.length === 0) {
+        earStatus.textContent = "目前沒有題目，請先按「出題」。";
+        return;
+      }
+      if (earAnswer.length === 0) {
+        earStatus.textContent = "尚未作答，請在鼓面或 1～7 按鈕上輸入答案。";
+        return;
+      }
+      const correct =
+        earAnswer.length === earQuestion.length &&
+        earAnswer.every((v, i) => v === earQuestion[i]);
+      if (correct) {
+        earStatus.textContent = "✅ 答對了！可以換一題或提高難度。";
+      } else {
+        earStatus.textContent =
+          "❌ 再試試看！正確答案是：「" + earQuestion.join(" - ") + "」。";
+      }
+    });
+
+    // Page2：鼓面（用來回答）
+    createDrum("drum-ear", (degree, pad) => {
+      addEarAnswer(degree);
+    });
+
+    // Page2：1~7 按鈕
+    const earButtonsRow = document.getElementById("earButtonsRow");
+    if (earButtonsRow) {
+      for (let d = 1; d <= 7; d++) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "ear-digit-btn";
+        btn.textContent = String(d);
+        btn.dataset.digit = String(d);
+        btn.addEventListener("click", () => {
+          addEarAnswer(btn.dataset.digit);
+        });
+        earButtonsRow.appendChild(btn);
+      }
+    }
+
+    // 鍵盤 1～7：在演奏頁只發音，在聽寫頁：發音＋作答
     document.addEventListener("keydown", (e) => {
       const key = e.key;
       if (key >= "1" && key <= "7") {
         e.preventDefault();
-        playDegree(key, null);
+        if (currentPageId === "page-ear") {
+          addEarAnswer(key);
+        } else {
+          playDegree(key, null);
+        }
       }
     });
   </script>
