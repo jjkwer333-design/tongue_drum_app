@@ -212,7 +212,7 @@
       margin-top: 4px;
     }
 
-    /* 鼓面容器：用 D 調圖片當底 */
+    /* 鼓面容器：用 D 調鼓圖片當底圖 */
     .drum-container {
       position: relative;
       width: min(520px, 80vw);
@@ -226,39 +226,50 @@
       margin: 16px auto;
     }
 
-    /* 鼓面按鈕：透明，只留下點擊區域＋光圈 */
+    /* 鼓面按鈕（透明熱區） */
     .pad {
       position: absolute;
-      width: 18%;
-      height: 18%;
       border-radius: 50%;
       border: 2px solid transparent;
       background: transparent;
       cursor: pointer;
       user-select: none;
-      transition: transform 0.08s ease-out,
+      transition: transform 0.06s ease-out,
                   box-shadow 0.08s ease-out,
                   border-color 0.08s ease-out,
                   background 0.08s ease-out;
     }
 
-    /* 內部數字幾乎看不到（需要時可以暫時打開） */
+    /* 中心、內圈、外圈不同大小 */
+    .pad-center {
+      width: 22%;
+      height: 22%;
+    }
+    .pad-inner {
+      width: 18%;
+      height: 18%;
+    }
+    .pad-outer {
+      width: 14%;
+      height: 14%;
+    }
+
+    /* 數字文字幾乎看不到，只留給 Debug 用 */
     .pad span {
       font-size: 24px;
       font-weight: 600;
       color: #fff;
-      opacity: 0; /* 完全隱藏數字 */
+      opacity: 0;
       text-shadow: 0 0 4px rgba(0,0,0,0.8);
       transition: opacity 0.12s;
     }
-    /* 如果要按下時淡淡看到數字，把下面註解解除
+    /* 若你想按下時淡淡看到數字，可保留；不想看到就整段刪掉 */
     .pad:hover span,
     .pad.active span {
       opacity: 0.18;
     }
-    */
 
-    /* 光圈效果 */
+    /* 點擊 / hover 的光圈效果 */
     .pad::before {
       content: "";
       position: absolute;
@@ -592,14 +603,14 @@
         <div class="drum-wrapper">
           <div class="drum-container" id="drum-play"></div>
           <div class="drum-caption">
-            D 調空靈鼓（簡化 1～7 音階）<br/>
-            中央「1」為主音，外圈 2～7 以接近真實空靈鼓的排列方式環繞配置。
+            D 調 15 舌空靈鼓（簡化 1～7 音階）<br/>
+            點擊實物圖上的舌片位置即可發聲，支援連打與疊音。
           </div>
         </div>
         <div class="help-panel">
           🔊 每個數字代表簡譜：1=D、2=E、3=F#、4=G、5=A、6=B、7=C#<br/>
           🖱 滑鼠點擊鼓面舌片位置可以聽音階<br/>
-          ⌨️ 鍵盤按 <span class="kbd">1</span>～<span class="kbd">7</span> 也可以直接發音<br/>
+          ⌨️ 鍵盤按 <span class="kbd">1</span>～<span class="kbd">7</span> 也可以直接發音（不分高低八度）<br/>
           📂 音檔位置：<code>assets/drums/drum_d/drumLong_*.wav</code>
         </div>
       </section>
@@ -631,7 +642,7 @@
           <div class="ear-buttons" id="earButtonsRow"></div>
           <div class="ear-hint">
             👉 可以點上面的鼓面、下面的 <b>1～7</b> 按鈕，或用鍵盤按
-            <span class="kbd">1</span>～<span class="kbd">7</span> 作答。
+            <span class="kbd">1</span>～<span class="kbd">7</span> 作答（同樣不分高低八度）。
           </div>
         </div>
       </section>
@@ -782,65 +793,78 @@
       const audio = audioMap[key];
       if (!audio) return;
 
-      const clone = audio.cloneNode();   // 為了可以快速連打
+      // cloneNode 支援連打 / 疊音，不會被前一個 audio 中斷
+      const clone = audio.cloneNode();
       clone.currentTime = 0;
       clone.play();
 
+      const activatePad = (pad) => {
+        if (!pad) return;
+        pad.classList.add("active");
+        setTimeout(() => pad.classList.remove("active"), 120);
+      };
+
       if (padElement) {
-        padElement.classList.add("active");
-        setTimeout(() => padElement.classList.remove("active"), 120);
+        activatePad(padElement);
       } else {
         const pads = document.querySelectorAll(".pad");
         pads.forEach((p) => {
-          if (p.dataset.degree === key) {
-            p.classList.add("active");
-            setTimeout(() => p.classList.remove("active"), 120);
-          }
+          if (p.dataset.degree === key) activatePad(p);
         });
       }
     }
 
-    // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
-    // x, y 為在鼓面上的百分比座標（0~100）
-    const padLayout = [
-      // 內圈：中音 1～7（中心是 1）
-      { degree: "1", octave: "mid",  x:78 , y:32  },  // 內圈大,時針2時30分
-      { degree: "2", octave: "mid",  x:36, y: 25 },  // 內圈大,時針11時方向
-      { degree: "3", octave: "mid",  x: 50, y: 42 },  // 內圈大,時針11時方向
-      { degree: "4", octave: "mid",  x: 50, y: 78 },  // 內圈大,時針6時方向
-      { degree: "5", octave: "mid",  x: 29, y: 69 },  // 內圈大,時針8時方向
-      { degree: "6", octave: "mid",  x: 59, y: 69 },  // 內圈大,時針4時方向
-      { degree: "7", octave: "mid",  x: 29, y: 40 },  // 內圈大,時針10時方向
+    // ===== 鼓面點擊區：標準 D 調 15 音布局 =====
+    // 座標以中心 (50,50) 為原點，依你提供：
+    // 內圈半徑 4cm、外圈 5.5cm 轉成比例後得到 r_inner ≈31.5%、r_outer ≈43.3%
+    // 時鐘角度換算後得到下面這組座標。
 
-      // 外圈：高音 1～7（靠近外圈舌片）
-      { degree: "1", octave: "high", x: 50, y: 11 },  // 外圈小,時針2時方向
-      { degree: "2", octave: "high", x: 83, y: 23 },  // 外圈小,時針10時30分方向
-      { degree: "3", octave: "high", x: 50, y: 11 },  // 外圈小,時針12時方向
-      { degree: "4", octave: "high", x: 79, y: 84 },  // 外圈小,時針5時方向
-      { degree: "5", octave: "high", x: 21, y: 84 },  // 外圈小,時針7時方向
-      { degree: "6", octave: "high", x: 10, y: 52 },  // 外圈小,時針3時30分方向
-      { degree: "7", octave: "high", x: 17, y: 23 }   // 外圈小,時針9時方向
+    const padLayout = [
+      // 中央：低音 3（最大舌片）
+      { id: "3_low_center", degree: "3", octave: "low",  ring: "center", x: 50.0, y: 45.0 },
+
+      // 內圈：大圈（半徑約 4cm 對應）—— 高音1 度 / 低音（依你描述）
+      { id: "1_mid_2_30", degree: "1", octave: "high1", ring: "inner",  x: 80.4, y: 41.8 }, // 內圈大, 2點半
+      { id: "2_mid_11",   degree: "2", octave: "high1", ring: "inner",  x: 34.3, y: 22.7 }, // 內圈大, 11點
+      { id: "3_mid_1",    degree: "3", octave: "high1", ring: "inner",  x: 65.7, y: 22.7 }, // 內圈大, 1點
+      { id: "4_low_6",    degree: "4", octave: "low",   ring: "inner",  x: 50.0, y: 81.5 }, // 內圈大, 6點
+      { id: "5_low_8",    degree: "5", octave: "low",   ring: "inner",  x: 22.7, y: 65.7 }, // 內圈大, 8點
+      { id: "6_low_4",    degree: "6", octave: "low",   ring: "inner",  x: 77.3, y: 65.7 }, // 內圈大, 4點
+      { id: "7_low_10",   degree: "7", octave: "low",   ring: "inner",  x: 22.7, y: 34.3 }, // 內圈大, 10點
+
+      // 外圈：小圈（半徑約 5.5cm 對應）
+      { id: "1_high2_2_30", degree: "1", octave: "high2", ring: "outer", x: 91.8, y: 38.8 }, // 外圈小, 2點半
+      { id: "2_high2_11",   degree: "2", octave: "high2", ring: "outer", x: 28.3, y: 12.5 }, // 外圈小, 11點
+      { id: "3_high2_1",    degree: "3", octave: "high2", ring: "outer", x: 71.7, y: 12.5 }, // 外圈小, 1點
+      { id: "4_high1_5",    degree: "4", octave: "high1", ring: "outer", x: 71.7, y: 87.5 }, // 外圈小, 5點
+      { id: "5_high1_7",    degree: "5", octave: "high1", ring: "outer", x: 28.3, y: 87.5 }, // 外圈小, 7點
+      { id: "6_high1_3_30", degree: "6", octave: "high1", ring: "outer", x: 91.8, y: 61.2 }, // 外圈小, 3點半
+      { id: "7_high1_8_30", degree: "7", octave: "high1", ring: "outer", x: 8.2,  y: 61.2 }  // 外圈小, 8點半
     ];
 
-    // 建立鼓面：依 padLayout 在指定 container 裡放透明按鈕
     function createDrum(containerId, onPadClick) {
       const container = document.getElementById(containerId);
       if (!container) return;
 
       container.innerHTML = "";
 
-      padLayout.forEach((p) => {
+      padLayout.forEach(p => {
         const pad = document.createElement("div");
-        pad.className = "pad";
+        pad.classList.add("pad");
+
+        if (p.ring === "center") pad.classList.add("pad-center");
+        else if (p.ring === "inner") pad.classList.add("pad-inner");
+        else pad.classList.add("pad-outer");
+
         pad.dataset.degree = p.degree;
-        pad.dataset.octave = p.octave;
+        pad.dataset.octave = p.octave || "";
 
         const span = document.createElement("span");
-        span.textContent = p.degree; // 幾乎看不到，只是方便 Debug 時可打開
+        span.textContent = p.degree;   // 數字幾乎看不到，只供 Debug
         pad.appendChild(span);
 
         pad.style.left = p.x + "%";
-        pad.style.top = p.y + "%";
+        pad.style.top  = p.y + "%";
         pad.style.transform = "translate(-50%, -50%)";
 
         pad.addEventListener("click", () => {
@@ -853,7 +877,6 @@
 
     // Page1：自由演奏鼓面
     createDrum("drum-play", (degree, octave, pad) => {
-      // 目前高音 / 中音共用同一組音檔，之後可以換成不同檔案
       playDegree(degree, pad, octave);
     });
 
@@ -986,7 +1009,7 @@
       });
     }
 
-    // 聽寫用鼓面（和上面同一套布局）
+    // 聽寫頁面的鼓面
     createDrum("drum-ear", (degree, octave, pad) => {
       addEarAnswer(degree);
     });
@@ -1022,9 +1045,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
