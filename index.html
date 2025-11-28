@@ -767,7 +767,7 @@
       audioMap[key] = a;
     }
 
-      function playDegree(degree, padElement, octave) {
+       function playDegree(degree, padElement, octave) {
     const key = String(degree);   // 目前先忽略 octave，高/低音共用同一音檔
     const audio = audioMap[key];
     if (!audio) return;
@@ -789,6 +789,7 @@
       });
     }
   }
+
 
 
     // ===== 鼓面排列：兩個 8 度 1～7 =====
@@ -851,8 +852,7 @@
     });
   }
 
-
-    // Page1：自由演奏鼓面
+     // Page1：自由演奏鼓面
   createDrum("drum-play", (degree, octave, pad) => {
     // 目前先忽略 octave，只是傳進去保留
     playDegree(degree, pad, octave);
@@ -863,6 +863,7 @@
     // 聽寫只看簡譜數字，不分高低八度
     addEarAnswer(degree);
   });
+
 
 
     // --- 聽寫練習 ---
@@ -1028,6 +1029,7 @@
   </script>
 </body>
 </html>
+
 
 
 
