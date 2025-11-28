@@ -222,7 +222,8 @@
       align-items: center;
       justify-content: center;
     }
-       .pad {
+         /* 鼓面按鈕：基礎樣式 */
+    .pad {
       position: absolute;
       width: 80px;   /* 預設給內圈用 */
       height: 80px;
@@ -243,17 +244,18 @@
       text-shadow: 0 0 4px rgba(0,0,0,0.8);
     }
 
-    /* 內圈（低音）大顆 */
+    /* 內圈：低音，大顆一點 */
     .pad-low {
       width: 90px;
       height: 90px;
     }
 
-    /* 外圈（高音）小顆 */
+    /* 外圈：高音，小顆一點 */
     .pad-high {
       width: 60px;
       height: 60px;
     }
+
 
     .pad.active {
       transform: scale(1.08);
@@ -765,30 +767,34 @@
       audioMap[key] = a;
     }
 
-    function playDegree(degree, padElement) {
-      const key = String(degree);
-      const audio = audioMap[key];
-      if (!audio) return;
-      const clone = audio.cloneNode();
-      clone.currentTime = 0;
-      clone.play();
+      function playDegree(degree, padElement, octave) {
+    const key = String(degree);   // 目前先忽略 octave，高/低音共用同一音檔
+    const audio = audioMap[key];
+    if (!audio) return;
 
-      if (padElement) {
-        padElement.classList.add("active");
-        setTimeout(() => padElement.classList.remove("active"), 120);
-      } else {
-        document.querySelectorAll(".pad").forEach(p => {
-          if (p.dataset.degree === key) {
-            p.classList.add("active");
-            setTimeout(() => p.classList.remove("active"), 120);
-          }
-        });
-      }
+    const clone = audio.cloneNode();
+    clone.currentTime = 0;
+    clone.play();
+
+    if (padElement) {
+      padElement.classList.add("active");
+      setTimeout(() => padElement.classList.remove("active"), 120);
+    } else {
+      const pads = document.querySelectorAll(".pad");
+      pads.forEach((p) => {
+        if (p.dataset.degree === key) {
+          p.classList.add("active");
+          setTimeout(() => p.classList.remove("active"), 120);
+        }
+      });
     }
+  }
 
-   // ===== 鼓面排列：兩個 8 度 1～7 =====
-  // 內圈：低音 1～7（大顆）   外圈：高音 1～7（小顆）
-  // 註：現在高音先暫時用同一組音檔，之後我們再換成真正高八度 wav
+
+    // ===== 鼓面排列：兩個 8 度 1～7 =====
+  // 內圈：低音 1～7（大顆 pad-low）
+  // 外圈：高音 1～7（小顆 pad-high，顯示成 1˙ 2˙ 3˙）
+  // 現階段高音先用同一組 1～7 音檔，之後再換成真正的高八度
   const padLayout = [
     // 內圈：低音 1～7
     { degree: "1", octave: "low",  x: 50, y: 50 },
@@ -817,7 +823,7 @@
       const pad = document.createElement("div");
       pad.className = "pad";
 
-      // 低音 / 高音決定大小
+      // 內圈 / 外圈套不同尺寸
       if (p.octave === "low") {
         pad.classList.add("pad-low");
       } else if (p.octave === "high") {
@@ -828,7 +834,7 @@
       pad.dataset.octave = p.octave;
 
       const span = document.createElement("span");
-      // 高音顯示「1˙ 2˙ 3˙」這種效果
+      // 高音顯示 1˙ 2˙ 3˙ 這種效果
       span.textContent = p.octave === "high" ? p.degree + "˙" : p.degree;
       pad.appendChild(span);
 
@@ -837,13 +843,14 @@
       pad.style.transform = "translate(-50%, -50%)";
 
       pad.addEventListener("click", () => {
-        // 目前先用同一組 1～7 音檔發聲，之後再加入高八度
-        onPadClick(p.degree, pad);
+        // 目前先把 octave 傳出去，但音檔先共用
+        onPadClick(p.degree, p.octave, pad);
       });
 
       container.appendChild(pad);
     });
   }
+
 
     // Page1 鼓面
     createDrum("drum-play", (degree, pad) => playDegree(degree, pad));
@@ -1011,5 +1018,6 @@
   </script>
 </body>
 </html>
+
 
 
