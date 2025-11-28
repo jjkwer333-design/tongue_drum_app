@@ -5,21 +5,6 @@
   <title>空靈鼓練習 App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-         .drum-surface {
-      position: relative;
-      width: min(560px, 80vw);
-      height: min(560px, 80vw);
-      margin: 40px auto;
-      border-radius: 50%;
-      /* 改成用你的 D 調鼓圖片當底圖 */
-      background-image: url("assets/images/drum_d_layout.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      box-shadow: 0 0 40px rgba(0,0,0,0.8);
-    }
-
-
     * { box-sizing: border-box; }
     body {
       margin: 0;
@@ -226,125 +211,71 @@
       gap: 8px;
       margin-top: 4px;
     }
-    /* 鼓面容器：改用圖片當背景 */
-/* 鼓面容器：用 D 調鼓圖片當底 */
-.drum-container {
-  position: relative;
-  width: min(520px, 80vw);
-  height: min(520px, 80vw);
-  border-radius: 50%;
-  background-image: url("assets/images/drum_d_layout.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  box-shadow: 0 0 40px rgba(0,0,0,0.8);
-  margin: 16px auto;
-}
 
-/* 鼓面按鈕：預設完全透明，只留下點擊區域 */
-.pad {
-  position: absolute;
-  width: 18%;      /* 用百分比，跟鼓面一起縮放 */
-  height: 18%;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  background: transparent;
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.06s ease-out,
-              box-shadow 0.08s ease-out,
-              border-color 0.08s ease-out,
-              background 0.08s ease-out;
-}
-
-/* 內部數字文字：幾乎看不到（你要完全隱藏就改成 opacity:0） */
-.pad span {
-  font-size: 24px;
-  font-weight: 600;
-  color: #fff;
-  opacity: 0.08;          /* 想完全隱形就改成 0 */
-  text-shadow: 0 0 4px rgba(0,0,0,0.8);
-}
-
-/* 按下 / 滑過時才稍微亮一圈，當作有被打到的回饋 */
-.pad:hover,
-.pad.active {
-  border-color: rgba(255, 240, 190, 0.9);
-  background: radial-gradient(circle at 30% 30%, rgba(255,240,190,0.35) 0, rgba(255,190,120,0.05) 60%, transparent 100%);
-  box-shadow: 0 0 18px rgba(255, 240, 190, 0.9);
-  transform: scale(1.04);
-}
-
-
-/* 內圈：低音，大顆一點 */
-.pad-low {
-  width: 90px;
-  height: 90px;
-}
-
-/* 外圈：高音，小顆一點 */
-.pad-high {
-  width: 60px;
-  height: 60px;
-}
-
-/* 真正亮起來的「光圈」用 ::before 畫 */
-.pad::before {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #f3d36f 0, #cc8a33 60%, #7b4b15 100%);
-  box-shadow: 0 0 12px rgba(0,0,0,0.9);
-  opacity: 0;
-  transform: scale(0.9);
-  transition: opacity 0.12s ease-out, transform 0.12s ease-out;
-}
-
-/* 滑過去可以微微看到位置（可依喜好調整，有需要太吵可以關掉） */
-.pad:hover::before {
-  opacity: 0.15;
-}
-
-/* 點擊時亮起 */
-.pad.active::before {
-  opacity: 0.95;
-  transform: scale(1.02);
-}
-
-
-  .pad span {
-  font-size: 24px;
-  font-weight: 600;
-  text-shadow: 0 0 4px rgba(0,0,0,0.8);
-  opacity: 0;                   /* 預設完全看不到數字 */
-  transition: opacity 0.12s;
-}
-
-/* 如果想要按下時淡淡顯示數字，可以加這兩行 */
-.pad:hover span,
-.pad.active span {
-  opacity: 0.18;                /* 若完全不要字，把這段整個刪掉也可以 */
-}
-
-
-    /* 內圈：低音，大顆一點 */
-    .pad-low {
-      width: 90px;
-      height: 90px;
+    /* 鼓面容器：用 D 調圖片當底 */
+    .drum-container {
+      position: relative;
+      width: min(520px, 80vw);
+      height: min(520px, 80vw);
+      border-radius: 50%;
+      background-image: url("assets/images/drum_d_layout.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      box-shadow: 0 0 40px rgba(0,0,0,0.8);
+      margin: 16px auto;
     }
 
-    /* 外圈：高音，小顆一點 */
-    .pad-high {
-      width: 60px;
-      height: 60px;
+    /* 鼓面按鈕：透明，只留下點擊區域＋光圈 */
+    .pad {
+      position: absolute;
+      width: 18%;
+      height: 18%;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: transparent;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.08s ease-out,
+                  box-shadow 0.08s ease-out,
+                  border-color 0.08s ease-out,
+                  background 0.08s ease-out;
     }
 
+    /* 內部數字幾乎看不到（需要時可以暫時打開） */
+    .pad span {
+      font-size: 24px;
+      font-weight: 600;
+      color: #fff;
+      opacity: 0; /* 完全隱藏數字 */
+      text-shadow: 0 0 4px rgba(0,0,0,0.8);
+      transition: opacity 0.12s;
+    }
+    /* 如果要按下時淡淡看到數字，把下面註解解除
+    .pad:hover span,
+    .pad.active span {
+      opacity: 0.18;
+    }
+    */
 
-    .pad.active {
-      transform: scale(1.08);
-      box-shadow: 0 0 16px rgba(255, 230, 180, 0.9);
-      background: radial-gradient(circle at 30% 30%, #f5d37a 0, #c98b35 60%, #7c4b15 100%);
+    /* 光圈效果 */
+    .pad::before {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #f3d36f 0, #cc8a33 60%, #7b4b15 100%);
+      box-shadow: 0 0 12px rgba(0,0,0,0.9);
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 0.12s ease-out, transform 0.12s ease-out;
+    }
+    .pad:hover::before {
+      opacity: 0.15;
+    }
+    .pad.active::before {
+      opacity: 0.95;
+      transform: scale(1.02);
     }
 
     .drum-caption {
@@ -585,18 +516,12 @@
       .sidebar-nav.open { display:flex; flex-direction:column; gap:8px; }
       .main-area { padding: 12px; }
       .help-panel { font-size:12px; padding:0 4px; }
-      .pad { width:68px; height:68px; }
-      .pad.center { width:86px; height:86px; }
-      .ear-controls { font-size:12px; }
-      .ear-answer { font-size:12px; }
     }
     @media (max-width: 600px) {
       .drum-container {
         width: min(420px, 84vw);
         height: min(420px, 84vw);
       }
-      .pad { width:62px; height:62px; }
-      .pad.center { width:80px; height:80px; }
     }
   </style>
 </head>
@@ -673,7 +598,7 @@
         </div>
         <div class="help-panel">
           🔊 每個數字代表簡譜：1=D、2=E、3=F#、4=G、5=A、6=B、7=C#<br/>
-          🖱 滑鼠點選圓上的按鍵可以聽音階<br/>
+          🖱 滑鼠點擊鼓面舌片位置可以聽音階<br/>
           ⌨️ 鍵盤按 <span class="kbd">1</span>～<span class="kbd">7</span> 也可以直接發音<br/>
           📂 音檔位置：<code>assets/drums/drum_d/drumLong_*.wav</code>
         </div>
@@ -833,7 +758,7 @@
     window.addEventListener("error", evt => logDebug("❌ JS Error: " + (evt.message || "")));
     window.addEventListener("unhandledrejection", evt => logDebug("❌ Promise Error: " + (evt.reason || "")));
 
-        // --- 音檔 ---
+    // --- 音檔 ---
     const audioFiles = {
       "1": "assets/drums/drum_d/drumLong_1.wav",
       "2": "assets/drums/drum_d/drumLong_2.wav",
@@ -853,117 +778,84 @@
     }
 
     function playDegree(degree, padElement, octave) {
-  const key = String(degree);
-  const audio = audioMap[key];
-  if (!audio) return;
+      const key = String(degree);
+      const audio = audioMap[key];
+      if (!audio) return;
 
-  const clone = audio.cloneNode();   // 每次點都複製一份新的聲音
-  clone.currentTime = 0;
-  clone.play();
+      const clone = audio.cloneNode();   // 為了可以快速連打
+      clone.currentTime = 0;
+      clone.play();
 
-  if (padElement) {
-    padElement.classList.add("active");
-    setTimeout(() => padElement.classList.remove("active"), 120);
-  } else {
-    const pads = document.querySelectorAll(".pad");
-    pads.forEach((p) => {
-      if (p.dataset.degree === key) {
-        p.classList.add("active");
-        setTimeout(() => p.classList.remove("active"), 120);
+      if (padElement) {
+        padElement.classList.add("active");
+        setTimeout(() => padElement.classList.remove("active"), 120);
+      } else {
+        const pads = document.querySelectorAll(".pad");
+        pads.forEach((p) => {
+          if (p.dataset.degree === key) {
+            p.classList.add("active");
+            setTimeout(() => p.classList.remove("active"), 120);
+          }
+        });
       }
-    });
-  }
-}
+    }
 
+    // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
+    // x, y 為在鼓面上的百分比座標（0~100）
+    const padLayout = [
+      // 內圈：中音 1～7（中心是 1）
+      { degree: "1", octave: "mid",  x: 50, y: 52 },  // 中央
+      { degree: "2", octave: "mid",  x: 50, y: 29 },  // 上
+      { degree: "3", octave: "mid",  x: 69, y: 36 },  // 右上
+      { degree: "4", octave: "mid",  x: 69, y: 69 },  // 右下
+      { degree: "5", octave: "mid",  x: 50, y: 78 },  // 下
+      { degree: "6", octave: "mid",  x: 31, y: 69 },  // 左下
+      { degree: "7", octave: "mid",  x: 31, y: 36 },  // 左上
 
-   // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
-// 說明：
-//   x, y 為在鼓面上的百分比座標（0~100）
-//   octave: "mid" 中音圈（內圈），"high" 高音圈（外圈）
-//   這版座標是依照你提供的紫色圖大致對齊過的，如果哪一格覺得還要微調，只要調 x/y 即可。
-const padLayout = [
-  // 內圈：中音 1～7（中心是 1）
-  { degree: "1", octave: "mid",  x: 50, y: 52 },  // 中央
-  { degree: "2", octave: "mid",  x: 50, y: 29 },  // 上
-  { degree: "3", octave: "mid",  x: 69, y: 36 },  // 右上
-  { degree: "4", octave: "mid",  x: 69, y: 69 },  // 右下
-  { degree: "5", octave: "mid",  x: 50, y: 78 },  // 下
-  { degree: "6", octave: "mid",  x: 31, y: 69 },  // 左下
-  { degree: "7", octave: "mid",  x: 31, y: 36 },  // 左上
+      // 外圈：高音 1～7（靠近外圈舌片）
+      { degree: "1", octave: "high", x: 50, y: 11 },  // 高 1
+      { degree: "2", octave: "high", x: 83, y: 23 },  // 高 2
+      { degree: "3", octave: "high", x: 90, y: 52 },  // 高 3
+      { degree: "4", octave: "high", x: 79, y: 84 },  // 高 4
+      { degree: "5", octave: "high", x: 21, y: 84 },  // 高 5
+      { degree: "6", octave: "high", x: 10, y: 52 },  // 高 6
+      { degree: "7", octave: "high", x: 17, y: 23 }   // 高 7
+    ];
 
-  // 外圈：高音 1～7（多一圈，貼近外圈舌片）
-  { degree: "1", octave: "high", x: 50, y: 11 },  // 高 1 最上方
-  { degree: "2", octave: "high", x: 83, y: 23 },  // 高 2 右上
-  { degree: "3", octave: "high", x: 90, y: 52 },  // 高 3 右
-  { degree: "4", octave: "high", x: 79, y: 84 },  // 高 4 右下
-  { degree: "5", octave: "high", x: 21, y: 84 },  // 高 5 左下
-  { degree: "6", octave: "high", x: 10, y: 52 },  // 高 6 左
-  { degree: "7", octave: "high", x: 17, y: 23 }   // 高 7 左上
-];
+    // 建立鼓面：依 padLayout 在指定 container 裡放透明按鈕
+    function createDrum(containerId, onPadClick) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
 
-// 建立鼓面：會依 padLayout 在指定 container 裡放透明按鈕
-function createDrum(containerId, onPadClick) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
+      container.innerHTML = "";
 
-  // 先清空（避免重複建立）
-  container.innerHTML = "";
+      padLayout.forEach((p) => {
+        const pad = document.createElement("div");
+        pad.className = "pad";
+        pad.dataset.degree = p.degree;
+        pad.dataset.octave = p.octave;
 
-  padLayout.forEach((p) => {
-    const pad = document.createElement("div");
-    pad.className = "pad";
-    pad.dataset.degree = p.degree;
-    pad.dataset.octave = p.octave;
+        const span = document.createElement("span");
+        span.textContent = p.degree; // 幾乎看不到，只是方便 Debug 時可打開
+        pad.appendChild(span);
 
-    const span = document.createElement("span");
-    // 如果你想在 Debug 時看得到高音的小點，可以暫時打開：
-    // span.textContent = p.octave === "high" ? p.degree + "˙" : p.degree;
-    span.textContent = p.degree;  // 但因為 CSS 幾乎透明，看起來實際上是隱藏的
-    pad.appendChild(span);
+        pad.style.left = p.x + "%";
+        pad.style.top = p.y + "%";
+        pad.style.transform = "translate(-50%, -50%)";
 
-    pad.style.left = p.x + "%";
-    pad.style.top = p.y + "%";
-    pad.style.transform = "translate(-50%, -50%)";
+        pad.addEventListener("click", () => {
+          onPadClick(p.degree, p.octave, pad);
+        });
 
-    pad.addEventListener("click", () => {
-      onPadClick(p.degree, p.octave, pad);
-    });
-
-    container.appendChild(pad);
-  });
-}
-
-// Page1：自由演奏鼓面
-createDrum("drum-play", (degree, octave, pad) => {
-  // 目前高音 / 中音都用同一組音檔，之後可以再換成真正高八度檔案
-  playDegree(degree, pad, octave);
-});
-
-// Page2：鼓面（用來回答聽寫）
-createDrum("drum-ear", (degree, octave, pad) => {
-  // 聽寫只看簡譜數字，不分高低八度
-  addEarAnswer(degree);
-});
+        container.appendChild(pad);
+      });
+    }
 
     // Page1：自由演奏鼓面
     createDrum("drum-play", (degree, octave, pad) => {
-      // 目前高音 / 低音先共用同一組音檔
-      playDegree(degree, pad);
+      // 目前高音 / 中音共用同一組音檔，之後可以換成不同檔案
+      playDegree(degree, pad, octave);
     });
-
-    // Page2：聽寫鼓面（只用數字，不分八度）
-    createDrum("drum-ear", (degree, octave, pad) => {
-      addEarAnswer(degree);
-    });
-
-
-  // Page2：鼓面（用來回答聽寫）
-  createDrum("drum-ear", (degree, octave, pad) => {
-    // 聽寫只看簡譜數字，不分高低八度
-    addEarAnswer(degree);
-  });
-
-
 
     // --- 聽寫練習 ---
     const earLevelBtns = document.querySelectorAll(".ear-level-btn");
@@ -1094,7 +986,10 @@ createDrum("drum-ear", (degree, octave, pad) => {
       });
     }
 
-    
+    // 聽寫用鼓面（和上面同一套布局）
+    createDrum("drum-ear", (degree, octave, pad) => {
+      addEarAnswer(degree);
+    });
 
     // 聽寫下方 1～7 按鈕
     const earButtonsRow = document.getElementById("earButtonsRow");
@@ -1127,13 +1022,3 @@ createDrum("drum-ear", (degree, octave, pad) => {
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
