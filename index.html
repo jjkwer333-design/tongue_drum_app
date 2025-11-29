@@ -323,6 +323,19 @@
       max-width: 520px;
     }
 
+
+    /* 中央低音 hover & active 階段額外放大 15% */
+.pad-center:hover::before,
+.pad-center.active::before {
+  transform: scale(1.17); /* 原本 1.02 → 1.17 (多 15%) */
+  opacity: 1;              /* 完整光暈 */
+}
+.pad-center:hover,
+.pad-center.active {
+  transform: translate(-50%, -50%) scale(1.15); /* 圓本體放大 15% */
+}
+
+
     /* Page: 聽寫練習 */
     .page-ear { flex-direction: column; align-items: center; gap: 16px; }
     .ear-controls {
@@ -1087,6 +1100,7 @@ const padLayout = [
   </script>
 </body>
 </html>
+
 
 
 
