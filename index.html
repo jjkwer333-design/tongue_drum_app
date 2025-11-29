@@ -745,7 +745,7 @@
     <div class="debug-body" id="debugBody"></div>
   </div>
 
-  <script>
+    <script>
     const APP_VERSION = "0.7.0";
 
     // --- 左側選單切換 ---
@@ -825,7 +825,7 @@
     window.addEventListener("error", evt => logDebug("❌ JS Error: " + (evt.message || "")));
     window.addEventListener("unhandledrejection", evt => logDebug("❌ Promise Error: " + (evt.reason || "")));
 
-       // --- 音檔 ---
+    // --- 音檔 ---
     const audioFiles = {
       "1": "assets/drums/drum_d/drumLong_1.wav",
       "2": "assets/drums/drum_d/drumLong_2.wav",
@@ -843,57 +843,12 @@
       audioMap[key] = a;
     }
 
-    // ⭐ 簡單版八度對應：不要太誇張，只做溫和一點的高低音
-    // low   = 稍微降一點（偏鬆、厚一點）
-    // high1 = 原音
-    // high2 = 稍微升一點（不要到兩倍速那麼尖）
-    const PLAYBACK_RATE_BY_OCTAVE = {
-      low:   0.80,
-      high1: 1.00,
-      high2: 1.25
-    };
-
-    function playDegree(degree, padElement, octave) {
-      const key = String(degree);
-      const audio = audioMap[key];
-      if (!audio) return;
-
-      // 依據 octave 決定播放速度
-      const rate = PLAYBACK_RATE_BY_OCTAVE[octave] ?? 1.0;
-
-      // 用 clone 避免正在播放的 Audio 被搶走
-      const clone = audio.cloneNode();
-      clone.playbackRate = rate;
-      clone.currentTime = 0;
-      clone.volume = 0.9;   // 稍微小一點，減少爆音感
-
-      // 播放（加上 try-catch 避免有時瀏覽器阻擋自動播放的錯誤）
-      clone.play().catch(() => {});
-
-      // 視覺效果
-      if (padElement) {
-        padElement.classList.add("active");
-        setTimeout(() => padElement.classList.remove("active"), 120);
-      } else {
-        const pads = document.querySelectorAll(".pad");
-        pads.forEach((p) => {
-          if (p.dataset.degree === key) {
-            p.classList.add("active");
-            setTimeout(() => p.classList.remove("active"), 120);
-          }
-        });
-      }
-    }
-
-
-    // --- Web Audio：EQ / playbackRate 設定 ---
+    // --- Web Audio：EQ / context ---
     let audioCtx = null;
     function getAudioCtx() {
       if (!audioCtx) {
         const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (Ctx) {
-          audioCtx = new Ctx();
-        }
+        if (Ctx) audioCtx = new Ctx();
       }
       return audioCtx;
     }
@@ -901,15 +856,13 @@
     // 將 degree + octaveLabel 轉成 MIDI / 真實音名（只是顯示，不影響實際頻率）
     const DEGREE_OFFSET = { "1":0, "2":2, "3":4, "4":5, "5":7, "6":9, "7":11 };
     function degreeToPitchName(degree, octaveLabel) {
-      // 假設：中音：D4 起（1=D4），低音少一個八度，高音多一個或兩個八度
       let baseOctave;
       switch (octaveLabel) {
-        case "low":   baseOctave = 3; break;  // D3～
-        case "high1": baseOctave = 4; break;  // D4～
-        case "high2": baseOctave = 5; break;  // D5～
-        default:      baseOctave = 4; break;  // 其他當中音
+        case "low":   baseOctave = 3; break;  // D3 起
+        case "high1": baseOctave = 4; break;  // D4 起
+        case "high2": baseOctave = 5; break;  // D5 起
+        default:      baseOctave = 4; break;
       }
-      // 1=D、2=E、3=F#、4=G、5=A、6=B、7=C#
       const semitoneOffset = DEGREE_OFFSET[degree] ?? 0;
       const baseMidi = 62; // D4 = 62
       const octaveDiff = baseOctave - 4;
@@ -977,7 +930,7 @@
       });
     }
 
-    // --- 播放函式（帶 EQ / playbackRate / 錄音） ---
+    // --- 單一版本的 playDegree（含：高低音 + EQ + 錄音 + 視覺） ---
     function playDegree(degree, padElement, octaveLabel) {
       const key = String(degree);
       const baseAudio = audioMap[key];
@@ -987,10 +940,9 @@
       const clone = baseAudio.cloneNode();
       clone.currentTime = 0;
 
-      // 預設 octaveLabel 如果沒給，當作中音（high1）
       const oct = octaveLabel || "high1";
 
-      // 簡單用 playbackRate 模擬高低音：低音稍慢，高音稍快
+      // 簡單的高低音比例
       let rate = 1.0;
       if (oct === "low")      rate = 0.80;
       else if (oct === "high1") rate = 1.05;
@@ -999,21 +951,19 @@
 
       if (ctx) {
         ctx.resume && ctx.resume();
-
         const source = ctx.createMediaElementSource(clone);
         const filter = ctx.createBiquadFilter();
         const gainNode = ctx.createGain();
 
-        // 簡單 EQ：低音 cutoff 低一點，高音高一點，但都稍微削掉尖銳高頻
         if (oct === "low") {
           filter.type = "lowpass";
-          filter.frequency.value = 1800;  // 低音偏暖
+          filter.frequency.value = 1800;
           gainNode.gain.value = 1.05;
         } else if (oct === "high2") {
           filter.type = "lowpass";
-          filter.frequency.value = 3500;  // 高音，但不要太尖
+          filter.frequency.value = 3500;
           gainNode.gain.value = 0.95;
-        } else { // high1 / 其他
+        } else {
           filter.type = "lowpass";
           filter.frequency.value = 2800;
           gainNode.gain.value = 1.0;
@@ -1023,13 +973,12 @@
         filter.connect(gainNode);
         gainNode.connect(ctx.destination);
 
-        clone.play();
+        clone.play().catch(() => {});
       } else {
-        // 沒有 Web Audio（很舊的瀏覽器）就直接播放
-        clone.play();
+        clone.play().catch(() => {});
       }
 
-      // pad 視覺效果
+      // 視覺效果
       if (padElement) {
         padElement.classList.add("active");
         setTimeout(() => padElement.classList.remove("active"), 120);
@@ -1056,7 +1005,6 @@
     }
 
     // ===== 鼓面點擊區：D 調 15 舌片布局 =====
-    // x, y 為鼓面上的百分比座標（0~100），以整張圖片左上角為 (0,0)。
     const padLayout = [
       // 中央：最低音 3（單獨一塊）
       { id: "3_low_center", degree: "3", octave: "low",  ring: "center", x: 50.0, y: 42 },
@@ -1071,51 +1019,48 @@
       { id: "6_low_20",   degree: "6", octave: "low",   ring: "inner", x: 74.5, y: 64.6 },
       { id: "7_low_50",   degree: "7", octave: "low",   ring: "inner", x: 22,   y: 42 },
 
-      // 外圈：7 點（藍點）—— 座標依你之前校正
-      { id: "3_high2_top",   degree: "3", octave: "high2", ring: "outer", x: 49.0, y:  8.2 }, // 正上方 3
-      { id: "1_high2_tr",    degree: "1", octave: "high2", ring: "outer", x: 78.6, y: 22.8 }, // 右上 1
-      { id: "6_high2_right", degree: "6", octave: "high2", ring: "outer", x: 88.0, y: 53.9 }, // 右邊 6
+      // 外圈：7 點（藍點）
+      { id: "3_high2_top",   degree: "3", octave: "high2", ring: "outer", x: 49.0, y:  8.2 },
+      { id: "1_high2_tr",    degree: "1", octave: "high2", ring: "outer", x: 78.6, y: 22.8 },
+      { id: "6_high2_right", degree: "6", octave: "high2", ring: "outer", x: 88.0, y: 53.9 },
 
-      { id: "4_high1_br",    degree: "4", octave: "high1", ring: "outer", x: 66.8, y: 80.6 }, // 右下 4
-      { id: "5_high1_bl",    degree: "5", octave: "high1", ring: "outer", x: 33.0, y: 82.5 }, // 左下 5
-      { id: "7_high1_left",  degree: "7", octave: "high1", ring: "outer", x: 11.3, y: 54.4 }, // 左邊 7
-      { id: "2_high1_tl",    degree: "2", octave: "high1", ring: "outer", x: 20.6, y: 23.2 }  // 左上 2
+      { id: "4_high1_br",    degree: "4", octave: "high1", ring: "outer", x: 66.8, y: 80.6 },
+      { id: "5_high1_bl",    degree: "5", octave: "high1", ring: "outer", x: 33.0, y: 82.5 },
+      { id: "7_high1_left",  degree: "7", octave: "high1", ring: "outer", x: 11.3, y: 54.4 },
+      { id: "2_high1_tl",    degree: "2", octave: "high1", ring: "outer", x: 20.6, y: 23.2 }
     ];
 
     function createDrum(containerId, onPadClick) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = "";
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = "";
 
-  padLayout.forEach((p) => {
-    const pad = document.createElement("div");
-    pad.classList.add("pad");
-    if (p.ring === "center") pad.classList.add("pad-center");
-    else if (p.ring === "inner") pad.classList.add("pad-inner");
-    else if (p.ring === "outer") pad.classList.add("pad-outer");
+      padLayout.forEach((p) => {
+        const pad = document.createElement("div");
+        pad.classList.add("pad");
+        if (p.ring === "center") pad.classList.add("pad-center");
+        else if (p.ring === "inner") pad.classList.add("pad-inner");
+        else if (p.ring === "outer") pad.classList.add("pad-outer");
 
-    pad.dataset.id = p.id;
-    pad.dataset.degree = p.degree;
-    pad.dataset.octave = p.octave;
+        pad.dataset.id = p.id;
+        pad.dataset.degree = p.degree;
+        pad.dataset.octave = p.octave;
 
-    // ➜ 計算真實音名，放在 title（hover 時會顯示）
-    const pitchName = degreeToPitchName(p.degree, p.octave);
-    pad.dataset.pitchName = pitchName;
-    pad.title = `${pitchName}（簡譜 ${p.degree}）`;
+        const pitchName = degreeToPitchName(p.degree, p.octave);
+        pad.dataset.pitchName = pitchName;
+        pad.title = `${pitchName}（簡譜 ${p.degree}）`;
 
-    const span = document.createElement("span");
-    span.textContent = p.degree;   // 中間隱約看到簡譜數字
-    pad.appendChild(span);
+        const span = document.createElement("span");
+        span.textContent = p.degree;
+        pad.appendChild(span);
 
-    pad.style.left = p.x + "%";
-    pad.style.top  = p.y + "%";
-    pad.style.transform = "translate(-50%, -50%)";
+        pad.style.left = p.x + "%";
+        pad.style.top  = p.y + "%";
+        pad.style.transform = "translate(-50%, -50%)";
 
-    pad.addEventListener("click", () => onPadClick(p.degree, p.octave, pad));
-    container.appendChild(pad);
-  });
-}
-
+        pad.addEventListener("click", () => onPadClick(p.degree, p.octave, pad));
+        container.appendChild(pad);
+      });
     }
 
     // --- 聽寫練習 ---
@@ -1184,8 +1129,7 @@
         return;
       }
       const d = earQuestion[index];
-      // 聽寫題目用「中音」的音色
-      playDegree(d, null, "high1");
+      playDegree(d, null, "high1"); // 聽寫題目用中音
       setTimeout(() => playQuestionSequence(index + 1), 650);
     }
 
@@ -1197,8 +1141,7 @@
       }
       earAnswer.push(digit);
       updateEarAnswerText();
-      // 作答也用中音音色
-      playDegree(digit, null, "high1");
+      playDegree(digit, null, "high1"); // 作答也用中音
     }
 
     if (btnEarNew) {
@@ -1265,12 +1208,10 @@
 
     // 建立兩個鼓面
     createDrum("drum-play", (degree, octave, pad) => {
-      // 演奏器：照舌片實際 octave 播放
-      playDegree(degree, pad, octave);
+      playDegree(degree, pad, octave); // 演奏器照舌片 octave 播
     });
     createDrum("drum-ear", (degree, octave, pad) => {
-      // 聽寫頁面的鼓面：只記作答，播放用中音
-      addEarAnswer(degree);
+      addEarAnswer(degree); // 聽寫頁面只記作答
     });
 
     // 鍵盤 1～7
@@ -1281,16 +1222,17 @@
         if (currentPageId === "page-ear") {
           addEarAnswer(key);
         } else {
-          // 演奏器用中音音色（你也可以改成 high1 / low）
-          playDegree(key, null, "high1");
+          playDegree(key, null, "high1"); // 鍵盤先用中音
         }
       }
     });
 
     logDebug("App 初始化完成，版本：" + APP_VERSION);
   </script>
+
 </body>
 </html>
+
 
 
 
