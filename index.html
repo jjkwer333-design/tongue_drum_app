@@ -825,7 +825,7 @@
     window.addEventListener("error", evt => logDebug("❌ JS Error: " + (evt.message || "")));
     window.addEventListener("unhandledrejection", evt => logDebug("❌ Promise Error: " + (evt.reason || "")));
 
-    // --- 音檔 ---
+       // --- 音檔 ---
     const audioFiles = {
       "1": "assets/drums/drum_d/drumLong_1.wav",
       "2": "assets/drums/drum_d/drumLong_2.wav",
@@ -842,6 +842,49 @@
       a.preload = "auto";
       audioMap[key] = a;
     }
+
+    // ⭐ 簡單版八度對應：不要太誇張，只做溫和一點的高低音
+    // low   = 稍微降一點（偏鬆、厚一點）
+    // high1 = 原音
+    // high2 = 稍微升一點（不要到兩倍速那麼尖）
+    const PLAYBACK_RATE_BY_OCTAVE = {
+      low:   0.80,
+      high1: 1.00,
+      high2: 1.25
+    };
+
+    function playDegree(degree, padElement, octave) {
+      const key = String(degree);
+      const audio = audioMap[key];
+      if (!audio) return;
+
+      // 依據 octave 決定播放速度
+      const rate = PLAYBACK_RATE_BY_OCTAVE[octave] ?? 1.0;
+
+      // 用 clone 避免正在播放的 Audio 被搶走
+      const clone = audio.cloneNode();
+      clone.playbackRate = rate;
+      clone.currentTime = 0;
+      clone.volume = 0.9;   // 稍微小一點，減少爆音感
+
+      // 播放（加上 try-catch 避免有時瀏覽器阻擋自動播放的錯誤）
+      clone.play().catch(() => {});
+
+      // 視覺效果
+      if (padElement) {
+        padElement.classList.add("active");
+        setTimeout(() => padElement.classList.remove("active"), 120);
+      } else {
+        const pads = document.querySelectorAll(".pad");
+        pads.forEach((p) => {
+          if (p.dataset.degree === key) {
+            p.classList.add("active");
+            setTimeout(() => p.classList.remove("active"), 120);
+          }
+        });
+      }
+    }
+
 
     // --- Web Audio：EQ / playbackRate 設定 ---
     let audioCtx = null;
@@ -1248,5 +1291,6 @@
   </script>
 </body>
 </html>
+
 
 
