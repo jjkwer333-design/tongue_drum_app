@@ -1040,37 +1040,39 @@
     ];
 
     function createDrum(containerId, onPadClick) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      container.innerHTML = "";
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "";
 
-      padLayout.forEach((p) => {
-        const pad = document.createElement("div");
-        pad.classList.add("pad");
-        if (p.ring === "center") pad.classList.add("pad-center");
-        else if (p.ring === "inner") pad.classList.add("pad-inner");
-        else if (p.ring === "outer") pad.classList.add("pad-outer");
+  padLayout.forEach((p) => {
+    const pad = document.createElement("div");
+    pad.classList.add("pad");
+    if (p.ring === "center") pad.classList.add("pad-center");
+    else if (p.ring === "inner") pad.classList.add("pad-inner");
+    else if (p.ring === "outer") pad.classList.add("pad-outer");
 
-        pad.dataset.id = p.id;
-        pad.dataset.degree = p.degree;
-        pad.dataset.octave = p.octave;
+    pad.dataset.id = p.id;
+    pad.dataset.degree = p.degree;
+    pad.dataset.octave = p.octave;
 
-        // 計算真實音名，放在 title（hover 時會顯示）
-        const pitchName = degreeToPitchName(p.degree, p.octave);
-        pad.dataset.pitchName = pitchName;
-        pad.title = `${pitchName}（簡譜 ${p.degree}）`;
+    // ➜ 計算真實音名，放在 title（hover 時會顯示）
+    const pitchName = degreeToPitchName(p.degree, p.octave);
+    pad.dataset.pitchName = pitchName;
+    pad.title = `${pitchName}（簡譜 ${p.degree}）`;
 
-        const span = document.createElement("span");
-        span.textContent = p.degree;   // 中間隱約看到簡譜數字
-        pad.appendChild(span);
+    const span = document.createElement("span");
+    span.textContent = p.degree;   // 中間隱約看到簡譜數字
+    pad.appendChild(span);
 
-        pad.style.left = p.x + "%";
-        pad.style.top  = p.y + "%";
-        pad.style.transform = "translate(-50%, -50%)";
+    pad.style.left = p.x + "%";
+    pad.style.top  = p.y + "%";
+    pad.style.transform = "translate(-50%, -50%)";
 
-        pad.addEventListener("click", () => onPadClick(p.degree, p.octave, pad));
-        container.appendChild(pad);
-      });
+    pad.addEventListener("click", () => onPadClick(p.degree, p.octave, pad));
+    container.appendChild(pad);
+  });
+}
+
     }
 
     // --- 聽寫練習 ---
@@ -1246,4 +1248,5 @@
   </script>
 </body>
 </html>
+
 
