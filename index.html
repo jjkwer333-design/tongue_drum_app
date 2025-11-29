@@ -240,11 +240,12 @@
                   background 0.08s ease-out;
     }
 
-   /* 只放大中央 3 的光暈 */
-.pad-center::before {
-  inset: -6px;           /* 原本是 -4px，可以試 -6 或 -8 看感覺 */
-  transform: scale(1.06);  /* 比其他 pad 的 0.9 / 1.02 再大一些 */
+   /* 中央最大圈（低音 3） */
+.pad-center {
+  width: 25%;
+  height: 25%;
 }
+
 
 
     /* 內圈大圓 */
@@ -1045,6 +1046,7 @@ const padLayout = [
   </script>
 </body>
 </html>
+
 
 
 
