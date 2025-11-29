@@ -273,33 +273,33 @@
     }
 
     /* 光暈效果 */
-    .pad::before {
-      content: "";
-      position: absolute;
-      inset: -4px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #f3d36f 0, #cc8a33 60%, #7b4b15 100%);
-      box-shadow: 0 0 12px rgba(0,0,0,0.9);
-      opacity: 0;
-      transform: scale(0.9);
-      transition: opacity 0.12s ease-out, transform 0.12s ease-out;
-    }
+ .pad::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #f3d36f 0, #cc8a33 60%, #7b4b15 100%);
+  box-shadow: 0 0 12px rgba(0,0,0,0.9);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.12s ease-out, transform 0.12s ease-out;
+}
 
-    .pad:hover::before {
-      opacity: 0.15;
-    }
+.pad:hover::before {
+  opacity: 0.18;          /* 一般舌片：微亮 */
+}
 
-    .pad.active::before {
-      opacity: 0.95;
-      transform: scale(1.02);
-    }
+.pad.active::before {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
 
-    /* ⭐ 中央低音：hover / active 光圈再大一圈，視覺上大約 +15% */
-    .pad-center:hover::before,
-    .pad-center.active::before {
-      transform: scale(1.2);
-      opacity: 1;
-    }
+/* ⭐ 中央低音 3：亮一點、稍微大一圈，但保留「半透明」 */
+.pad-center:hover::before,
+.pad-center.active::before {
+  opacity: 0.35;          /* 半透明，不要 1 */
+  transform: scale(1.12); /* 比其他舌片大一點點就好 */
+}
 
     .drum-caption {
       font-size: 13px;
@@ -1246,3 +1246,4 @@
   </script>
 </body>
 </html>
+
