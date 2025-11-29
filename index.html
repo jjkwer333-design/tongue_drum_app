@@ -816,7 +816,48 @@
         });
       }
     }
+// ======（新增）不同八度的播放速度倍率（合成高低音）======
+const OCTAVE_RATE = {
+  low:   0.80,  // 低音：中央大圈、內圈的 4~7
+  high1: 1.00,  // 中音：內圈 1~3、外圈 4~7
+  high2: 1.20   // 高音：外圈 1~3
+};
 
+// ======（完整更新後）playDegree：含 octave 聲音合成 ======
+function playDegree(degree, padElement, octave) {
+  const key = String(degree);
+  const audio = audioMap[key];
+  if (!audio) return;
+
+  // 用 cloneNode 可以同時播放多次同一音
+  const clone = audio.cloneNode();
+  clone.currentTime = 0;
+
+  // 套用八度音高倍率（若沒指定 octave 則預設 high1）
+  const rate = OCTAVE_RATE[octave] || OCTAVE_RATE.high1;
+  clone.playbackRate = rate;
+
+  clone.play();
+
+  // === 點擊鼓面動畫效果 ===
+  if (padElement) {
+    padElement.classList.add("active");
+    setTimeout(() => padElement.classList.remove("active"), 120);
+  } else {
+    // 若是鍵盤觸發，也要讓鼓面亮一下
+    const pads = document.querySelectorAll(".pad");
+    pads.forEach((p) => {
+      if (p.dataset.degree === key) {
+        p.classList.add("active");
+        setTimeout(() => p.classList.remove("active"), 120);
+      }
+    });
+  }
+}
+
+
+
+    
  // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
 // x, y 為鼓面上的百分比座標（0~100），以 50,50 為圓心。
 const padLayout = [
@@ -1046,6 +1087,7 @@ const padLayout = [
   </script>
 </body>
 </html>
+
 
 
 
