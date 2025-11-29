@@ -825,7 +825,7 @@
     window.addEventListener("error", evt => logDebug("❌ JS Error: " + (evt.message || "")));
     window.addEventListener("unhandledrejection", evt => logDebug("❌ Promise Error: " + (evt.reason || "")));
 
-    // --- 音檔 ---
+       // --- 音檔 ---
     const audioFiles = {
       "1": "assets/drums/drum_d/drumLong_1.wav",
       "2": "assets/drums/drum_d/drumLong_2.wav",
@@ -843,7 +843,7 @@
       audioMap[key] = a;
     }
 
-    // --- Web Audio：EQ / context ---
+    // --- Web Audio & 音名換算 ---
     let audioCtx = null;
     function getAudioCtx() {
       if (!audioCtx) {
@@ -853,14 +853,16 @@
       return audioCtx;
     }
 
-    // 將 degree + octaveLabel 轉成 MIDI / 真實音名（只是顯示，不影響實際頻率）
+    // 1=D、2=E、3=F#、4=G、5=A、6=B、7=C#
     const DEGREE_OFFSET = { "1":0, "2":2, "3":4, "4":5, "5":7, "6":9, "7":11 };
+
+    // 只用來顯示 hover 的真實音名
     function degreeToPitchName(degree, octaveLabel) {
       let baseOctave;
       switch (octaveLabel) {
-        case "low":   baseOctave = 3; break;  // D3 起
-        case "high1": baseOctave = 4; break;  // D4 起
-        case "high2": baseOctave = 5; break;  // D5 起
+        case "low":   baseOctave = 3; break;  // D3～
+        case "high1": baseOctave = 4; break;  // D4～
+        case "high2": baseOctave = 5; break;  // D5～
         default:      baseOctave = 4; break;
       }
       const semitoneOffset = DEGREE_OFFSET[degree] ?? 0;
@@ -930,7 +932,7 @@
       });
     }
 
-    // --- 單一版本的 playDegree（含：高低音 + EQ + 錄音 + 視覺） ---
+    // --- 單一版 playDegree：控制高低音＋EQ＋錄音 ---
     function playDegree(degree, padElement, octaveLabel) {
       const key = String(degree);
       const baseAudio = audioMap[key];
@@ -942,15 +944,16 @@
 
       const oct = octaveLabel || "high1";
 
-      // 簡單的高低音比例
+      // 高低音：只微調，不誇張
       let rate = 1.0;
-      if (oct === "low")      rate = 0.80;
+      if (oct === "low")        rate = 0.80;
       else if (oct === "high1") rate = 1.05;
       else if (oct === "high2") rate = 1.18;
       clone.playbackRate = rate;
 
       if (ctx) {
         ctx.resume && ctx.resume();
+
         const source = ctx.createMediaElementSource(clone);
         const filter = ctx.createBiquadFilter();
         const gainNode = ctx.createGain();
@@ -983,8 +986,7 @@
         padElement.classList.add("active");
         setTimeout(() => padElement.classList.remove("active"), 120);
       } else {
-        const pads = document.querySelectorAll(".pad");
-        pads.forEach((p) => {
+        document.querySelectorAll(".pad").forEach(p => {
           if (p.dataset.degree === key) {
             p.classList.add("active");
             setTimeout(() => p.classList.remove("active"), 120);
@@ -992,7 +994,7 @@
         });
       }
 
-      // 錄音紀錄
+      // 錄音
       if (isRecording) {
         const now = performance.now();
         const t = (now - recordStartTime) / 1000.0;
@@ -1006,10 +1008,10 @@
 
     // ===== 鼓面點擊區：D 調 15 舌片布局 =====
     const padLayout = [
-      // 中央：最低音 3（單獨一塊）
+      // 中央：最低音 3
       { id: "3_low_center", degree: "3", octave: "low",  ring: "center", x: 50.0, y: 42 },
 
-      // 內圈：大圈 —— 高音1 度 / 低音
+      // 內圈
       { id: "1_high1_10", degree: "1", octave: "high1", ring: "inner", x: 77,   y: 41 },
       { id: "2_high1_57", degree: "2", octave: "high1", ring: "inner", x: 36.5, y: 21.2 },
       { id: "3_high1_3",  degree: "3", octave: "high1", ring: "inner", x: 62.0, y: 22 },
@@ -1019,7 +1021,7 @@
       { id: "6_low_20",   degree: "6", octave: "low",   ring: "inner", x: 74.5, y: 64.6 },
       { id: "7_low_50",   degree: "7", octave: "low",   ring: "inner", x: 22,   y: 42 },
 
-      // 外圈：7 點（藍點）
+      // 外圈（藍點）
       { id: "3_high2_top",   degree: "3", octave: "high2", ring: "outer", x: 49.0, y:  8.2 },
       { id: "1_high2_tr",    degree: "1", octave: "high2", ring: "outer", x: 78.6, y: 22.8 },
       { id: "6_high2_right", degree: "6", octave: "high2", ring: "outer", x: 88.0, y: 53.9 },
@@ -1030,6 +1032,7 @@
       { id: "2_high1_tl",    degree: "2", octave: "high1", ring: "outer", x: 20.6, y: 23.2 }
     ];
 
+    // 建立鼓面（含 hover 音名）
     function createDrum(containerId, onPadClick) {
       const container = document.getElementById(containerId);
       if (!container) return;
@@ -1129,7 +1132,7 @@
         return;
       }
       const d = earQuestion[index];
-      playDegree(d, null, "high1"); // 聽寫題目用中音
+      playDegree(d, null, "high1");   // 聽寫題目用中音
       setTimeout(() => playQuestionSequence(index + 1), 650);
     }
 
@@ -1141,7 +1144,7 @@
       }
       earAnswer.push(digit);
       updateEarAnswerText();
-      playDegree(digit, null, "high1"); // 作答也用中音
+      playDegree(digit, null, "high1");
     }
 
     if (btnEarNew) {
@@ -1208,10 +1211,10 @@
 
     // 建立兩個鼓面
     createDrum("drum-play", (degree, octave, pad) => {
-      playDegree(degree, pad, octave); // 演奏器照舌片 octave 播
+      playDegree(degree, pad, octave);   // 演奏器：用舌片自己的 octave
     });
     createDrum("drum-ear", (degree, octave, pad) => {
-      addEarAnswer(degree); // 聽寫頁面只記作答
+      addEarAnswer(degree);              // 聽寫頁：只記數字
     });
 
     // 鍵盤 1～7
@@ -1228,10 +1231,12 @@
     });
 
     logDebug("App 初始化完成，版本：" + APP_VERSION);
+
   </script>
 
 </body>
 </html>
+
 
 
 
