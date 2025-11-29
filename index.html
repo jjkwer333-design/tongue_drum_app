@@ -240,17 +240,15 @@
                   background 0.08s ease-out;
     }
 
-  /* 中央最大圈（低音 3） */
-.pad-center {
-  width: 25%;
-  height: 25%;
-}
-
-
+    /* 中央最大圈（低音 3） */
+    .pad-center {
+      width: 22%;
+      height: 22%;
+    }
 
     /* 內圈大圓 */
     .pad-inner {
-      width: 18%;   /* 依你說再略小一些可以再調整 */
+      width: 18%;
       height: 18%;
     }
 
@@ -269,7 +267,6 @@
       transition: opacity 0.12s;
     }
 
-    /* 如果想按下時看到淡淡數字，就留這段；若完全不要字，可以刪掉 */
     .pad:hover span,
     .pad.active span {
       opacity: 0.18;
@@ -295,6 +292,13 @@
     .pad.active::before {
       opacity: 0.95;
       transform: scale(1.02);
+    }
+
+    /* ⭐ 中央低音：hover / active 光圈再大一圈，視覺上大約 +15% */
+    .pad-center:hover::before,
+    .pad-center.active::before {
+      transform: scale(1.2);
+      opacity: 1;
     }
 
     .drum-caption {
@@ -323,6 +327,41 @@
       max-width: 520px;
     }
 
+    /* 🎙 錄音面板 */
+    .record-panel {
+      margin-top: 4px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: rgba(0,0,0,0.4);
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      max-width: 520px;
+    }
+    .record-btn {
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid #666;
+      background: #222;
+      color: #eee;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .record-btn.primary {
+      border-color: #f77;
+      background: radial-gradient(circle at 30% 30%, #ff6b6b 0, #b22222 80%);
+      color: #fff;
+    }
+    .record-status {
+      font-size: 11px;
+      color: #f0e6b2;
+      margin-left: auto;
+      min-width: 120px;
+      text-align: right;
+    }
 
     /* Page: 聽寫練習 */
     .page-ear { flex-direction: column; align-items: center; gap: 16px; }
@@ -581,7 +620,7 @@
       </div>
 
       <div class="sidebar-footer">
-        v0.6.0 D 調 15 音版 + 聽寫 + Debug<br/>音檔：assets/drums/drum_d/
+        v0.7.0 D 調 15 音版 + 聽寫 + EQ + 錄音 + Debug<br/>音檔：assets/drums/drum_d/
       </div>
     </aside>
 
@@ -592,7 +631,7 @@
           <button class="settings-btn" id="btnSettings" type="button" title="設定 / Debug">⚙</button>
         </div>
         <div class="header-sub">
-          D 調 15 舌片鼓面演奏 + 聽寫練習 + 手機版選單 + Debug 工具。
+          D 調 15 舌片鼓面演奏 + 聽寫練習 + 手機版選單 + EQ 調整 + 錄音工具。
         </div>
       </div>
 
@@ -616,11 +655,20 @@
             中央為最低音 3，內圈 / 外圈對應你實際的內圈大圈、外圈小圈觸發位置。
           </div>
         </div>
+
+        <!-- 🎙 錄音面板 -->
+        <div class="record-panel">
+          <button id="btnRecToggle" class="record-btn primary">⏺ 開始錄音</button>
+          <button id="btnRecClear" class="record-btn">🧹 清除紀錄</button>
+          <button id="btnRecExport" class="record-btn">📄 匯出 JSON</button>
+          <div id="recStatus" class="record-status">目前未錄音</div>
+        </div>
+
         <div class="help-panel">
-          🔊 每個數字代表簡譜：1=D、2=E、3=F#、4=G、5=A、6=B、7=C#（暫時同一組音檔）<br/>
-          🖱 滑鼠點擊鼓面即可發聲<br/>
+          🔊 每個數字代表簡譜：1=D、2=E、3=F#、4=G、5=A、6=B、7=C#（同一組音檔，透過速率 / 濾波模擬高低音）<br/>
+          🖱 滑鼠點擊鼓面即可發聲（hover 會顯示真實音名，例如 D4、F#3、C#5）<br/>
           ⌨️ 鍵盤按 <span class="kbd">1</span>～<span class="kbd">7</span> 也可以直接發音（不分八度）<br/>
-          📂 音檔位置：<code>assets/drums/drum_d/drumLong_*.wav</code>
+          ⏺ 「開始錄音」後，敲擊都會被記錄成時間序列，可匯出 JSON。
         </div>
       </section>
 
@@ -675,7 +723,7 @@
       </section>
 
       <div class="footer">
-        v0.6.0：D 調 15 舌片鼓面 + 手機版選單 + 聽寫練習 + 設定 / Debug / 浮動預覽鈕。
+        v0.7.0：D 調 15 舌片鼓面 + EQ 調整 + 錄音模式 + 手機版選單 + 聽寫練習 + 設定 / Debug / 浮動預覽鈕。
       </div>
     </main>
   </div>
@@ -698,7 +746,7 @@
   </div>
 
   <script>
-    const APP_VERSION = "0.6.0";
+    const APP_VERSION = "0.7.0";
 
     // --- 左側選單切換 ---
     const navButtons = document.querySelectorAll(".nav-btn");
@@ -795,15 +843,150 @@
       audioMap[key] = a;
     }
 
-    function playDegree(degree, padElement, octave) {
+    // --- Web Audio：EQ / playbackRate 設定 ---
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (Ctx) {
+          audioCtx = new Ctx();
+        }
+      }
+      return audioCtx;
+    }
+
+    // 將 degree + octaveLabel 轉成 MIDI / 真實音名（只是顯示，不影響實際頻率）
+    const DEGREE_OFFSET = { "1":0, "2":2, "3":4, "4":5, "5":7, "6":9, "7":11 };
+    function degreeToPitchName(degree, octaveLabel) {
+      // 假設：中音：D4 起（1=D4），低音少一個八度，高音多一個或兩個八度
+      let baseOctave;
+      switch (octaveLabel) {
+        case "low":   baseOctave = 3; break;  // D3～
+        case "high1": baseOctave = 4; break;  // D4～
+        case "high2": baseOctave = 5; break;  // D5～
+        default:      baseOctave = 4; break;  // 其他當中音
+      }
+      // 1=D、2=E、3=F#、4=G、5=A、6=B、7=C#
+      const semitoneOffset = DEGREE_OFFSET[degree] ?? 0;
+      const baseMidi = 62; // D4 = 62
+      const octaveDiff = baseOctave - 4;
+      const midi = baseMidi + semitoneOffset + octaveDiff * 12;
+
+      const names = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+      const pitchClass = names[midi % 12];
+      const octave = Math.floor(midi / 12) - 1;
+      return pitchClass + octave;
+    }
+
+    // --- 錄音狀態 ---
+    let isRecording = false;
+    let recordStartTime = 0;
+    let recordedEvents = [];
+
+    const btnRecToggle = document.getElementById("btnRecToggle");
+    const btnRecClear = document.getElementById("btnRecClear");
+    const btnRecExport = document.getElementById("btnRecExport");
+    const recStatus = document.getElementById("recStatus");
+
+    if (btnRecToggle && recStatus) {
+      btnRecToggle.addEventListener("click", () => {
+        if (!isRecording) {
+          isRecording = true;
+          recordStartTime = performance.now();
+          recordedEvents = [];
+          btnRecToggle.textContent = "⏹ 停止錄音";
+          recStatus.textContent = "錄音中…";
+          logDebug("開始錄音");
+        } else {
+          isRecording = false;
+          btnRecToggle.textContent = "⏺ 開始錄音";
+          recStatus.textContent = `已錄製 ${recordedEvents.length} 筆事件`;
+          logDebug("停止錄音，共 " + recordedEvents.length + " 筆");
+        }
+      });
+    }
+
+    if (btnRecClear && recStatus) {
+      btnRecClear.addEventListener("click", () => {
+        recordedEvents = [];
+        recStatus.textContent = "紀錄已清除";
+        logDebug("清除錄音紀錄");
+      });
+    }
+
+    if (btnRecExport) {
+      btnRecExport.addEventListener("click", () => {
+        if (!recordedEvents.length) {
+          alert("目前沒有錄音紀錄。");
+          return;
+        }
+        const json = JSON.stringify(recordedEvents, null, 2);
+        const blob = new Blob([json], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "drum_recording.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        logDebug("已匯出錄音 JSON，共 " + recordedEvents.length + " 筆");
+      });
+    }
+
+    // --- 播放函式（帶 EQ / playbackRate / 錄音） ---
+    function playDegree(degree, padElement, octaveLabel) {
       const key = String(degree);
-      const audio = audioMap[key];
-      if (!audio) return;
+      const baseAudio = audioMap[key];
+      if (!baseAudio) return;
 
-      const clone = audio.cloneNode();
+      const ctx = getAudioCtx();
+      const clone = baseAudio.cloneNode();
       clone.currentTime = 0;
-      clone.play();
 
+      // 預設 octaveLabel 如果沒給，當作中音（high1）
+      const oct = octaveLabel || "high1";
+
+      // 簡單用 playbackRate 模擬高低音：低音稍慢，高音稍快
+      let rate = 1.0;
+      if (oct === "low")      rate = 0.80;
+      else if (oct === "high1") rate = 1.05;
+      else if (oct === "high2") rate = 1.18;
+      clone.playbackRate = rate;
+
+      if (ctx) {
+        ctx.resume && ctx.resume();
+
+        const source = ctx.createMediaElementSource(clone);
+        const filter = ctx.createBiquadFilter();
+        const gainNode = ctx.createGain();
+
+        // 簡單 EQ：低音 cutoff 低一點，高音高一點，但都稍微削掉尖銳高頻
+        if (oct === "low") {
+          filter.type = "lowpass";
+          filter.frequency.value = 1800;  // 低音偏暖
+          gainNode.gain.value = 1.05;
+        } else if (oct === "high2") {
+          filter.type = "lowpass";
+          filter.frequency.value = 3500;  // 高音，但不要太尖
+          gainNode.gain.value = 0.95;
+        } else { // high1 / 其他
+          filter.type = "lowpass";
+          filter.frequency.value = 2800;
+          gainNode.gain.value = 1.0;
+        }
+
+        source.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        clone.play();
+      } else {
+        // 沒有 Web Audio（很舊的瀏覽器）就直接播放
+        clone.play();
+      }
+
+      // pad 視覺效果
       if (padElement) {
         padElement.classList.add("active");
         setTimeout(() => padElement.classList.remove("active"), 120);
@@ -816,80 +999,45 @@
           }
         });
       }
-    }
-// ======（新增）不同八度的播放速度倍率（合成高低音）======
-const OCTAVE_RATE = {
-  low:   0.80,  // 低音：中央大圈、內圈的 4~7
-  high1: 1.00,  // 中音：內圈 1~3、外圈 4~7
-  high2: 1.20   // 高音：外圈 1~3
-};
 
-// ======（完整更新後）playDegree：含 octave 聲音合成 ======
-function playDegree(degree, padElement, octave) {
-  const key = String(degree);
-  const audio = audioMap[key];
-  if (!audio) return;
-
-  // 用 cloneNode 可以同時播放多次同一音
-  const clone = audio.cloneNode();
-  clone.currentTime = 0;
-
-  // 套用八度音高倍率（若沒指定 octave 則預設 high1）
-  const rate = OCTAVE_RATE[octave] || OCTAVE_RATE.high1;
-  clone.playbackRate = rate;
-
-  clone.play();
-
-  // === 點擊鼓面動畫效果 ===
-  if (padElement) {
-    padElement.classList.add("active");
-    setTimeout(() => padElement.classList.remove("active"), 120);
-  } else {
-    // 若是鍵盤觸發，也要讓鼓面亮一下
-    const pads = document.querySelectorAll(".pad");
-    pads.forEach((p) => {
-      if (p.dataset.degree === key) {
-        p.classList.add("active");
-        setTimeout(() => p.classList.remove("active"), 120);
+      // 錄音紀錄
+      if (isRecording) {
+        const now = performance.now();
+        const t = (now - recordStartTime) / 1000.0;
+        recordedEvents.push({
+          time: Number(t.toFixed(3)),
+          degree: key,
+          octave: oct
+        });
       }
-    });
-  }
-}
+    }
 
+    // ===== 鼓面點擊區：D 調 15 舌片布局 =====
+    // x, y 為鼓面上的百分比座標（0~100），以整張圖片左上角為 (0,0)。
+    const padLayout = [
+      // 中央：最低音 3（單獨一塊）
+      { id: "3_low_center", degree: "3", octave: "low",  ring: "center", x: 50.0, y: 42 },
 
+      // 內圈：大圈 —— 高音1 度 / 低音
+      { id: "1_high1_10", degree: "1", octave: "high1", ring: "inner", x: 77,   y: 41 },
+      { id: "2_high1_57", degree: "2", octave: "high1", ring: "inner", x: 36.5, y: 21.2 },
+      { id: "3_high1_3",  degree: "3", octave: "high1", ring: "inner", x: 62.0, y: 22 },
 
-    
- // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
-// x, y 為鼓面上的百分比座標（0~100），以 50,50 為圓心。
-const padLayout = [
-  // 中央：最低音 3（單獨一塊）
-  { id: "3_low_center", degree: "3", octave: "low",  ring: "center", x: 50.0, y: 42 },
+      { id: "4_low_30",   degree: "4", octave: "low",   ring: "inner", x: 50.0, y: 79.1 },
+      { id: "5_low_35",   degree: "5", octave: "low",   ring: "inner", x: 27,   y: 64.6 },
+      { id: "6_low_20",   degree: "6", octave: "low",   ring: "inner", x: 74.5, y: 64.6 },
+      { id: "7_low_50",   degree: "7", octave: "low",   ring: "inner", x: 22,   y: 42 },
 
-  // 內圈：大圈（半徑約 3.7cm 對應）—— 高音1 度 / 低音
-  { id: "1_high1_10", degree: "1", octave: "high1", ring: "inner", x: 77, y: 41 }, // 內圈大, 10分
+      // 外圈：7 點（藍點）—— 座標依你之前校正
+      { id: "3_high2_top",   degree: "3", octave: "high2", ring: "outer", x: 49.0, y:  8.2 }, // 正上方 3
+      { id: "1_high2_tr",    degree: "1", octave: "high2", ring: "outer", x: 78.6, y: 22.8 }, // 右上 1
+      { id: "6_high2_right", degree: "6", octave: "high2", ring: "outer", x: 88.0, y: 53.9 }, // 右邊 6
 
-  // ⬇⬇ 內圈「2、3」：y 調成 32.1，2 向左移 5%，3 向右移 3% ⬇⬇
-  { id: "2_high1_57", degree: "2", octave: "high1", ring: "inner", x: 36.5, y: 21.2 }, // 由 41.0,22.3 改成 36.0,32.1
-  { id: "3_high1_3",  degree: "3", octave: "high1", ring: "inner", x: 62.0, y: 22 }, // 由 59.0,22.3 改成 62.0,32.1
-  // ⬆⬆ 只動這兩顆，其餘內圈低音維持原本位置 ⬆⬆
-
-  { id: "4_low_30",   degree: "4", octave: "low",   ring: "inner", x: 50.0, y: 78 }, // 內圈大, 30分
-  { id: "5_low_35",   degree: "5", octave: "low",   ring: "inner", x: 26.5, y: 65 }, // 內圈大, 35分
-  { id: "6_low_20",   degree: "6", octave: "low",   ring: "inner", x: 74.5, y: 65 }, // 內圈大, 20分
-  { id: "7_low_50",   degree: "7", octave: "low",   ring: "inner", x: 22, y: 42 }, // 內圈大, 50分
-
- // 外圈：7 點（藍點）—— 座標不動，只修正對應的音高（degree）
-  { id: "3_high2_top",  degree: "3", octave: "high2", ring: "outer", x: 49.0, y:  8.2 }, // 正上方 3
-  { id: "1_high2_tr",   degree: "1", octave: "high2", ring: "outer", x: 78.6, y: 22.8 }, // 右上 1
-  { id: "6_high2_right",degree: "6", octave: "high2", ring: "outer", x: 88.0, y: 53.9 }, // 右邊 6
-
-  { id: "4_high1_br",   degree: "4", octave: "high1", ring: "outer", x: 66.8, y: 80.6 }, // 右下 4
-  { id: "5_high1_bl",   degree: "5", octave: "high1", ring: "outer", x: 33.0, y: 82.5 }, // 左下 5
-  { id: "7_high1_left", degree: "7", octave: "high1", ring: "outer", x: 11.3, y: 54.4 }, // 左邊 7
-  { id: "2_high1_tl",   degree: "2", octave: "high1", ring: "outer", x: 20.6, y: 23.2 }  // 左上 2
-];
-
-
+      { id: "4_high1_br",    degree: "4", octave: "high1", ring: "outer", x: 66.8, y: 80.6 }, // 右下 4
+      { id: "5_high1_bl",    degree: "5", octave: "high1", ring: "outer", x: 33.0, y: 82.5 }, // 左下 5
+      { id: "7_high1_left",  degree: "7", octave: "high1", ring: "outer", x: 11.3, y: 54.4 }, // 左邊 7
+      { id: "2_high1_tl",    degree: "2", octave: "high1", ring: "outer", x: 20.6, y: 23.2 }  // 左上 2
+    ];
 
     function createDrum(containerId, onPadClick) {
       const container = document.getElementById(containerId);
@@ -907,8 +1055,13 @@ const padLayout = [
         pad.dataset.degree = p.degree;
         pad.dataset.octave = p.octave;
 
+        // 計算真實音名，放在 title（hover 時會顯示）
+        const pitchName = degreeToPitchName(p.degree, p.octave);
+        pad.dataset.pitchName = pitchName;
+        pad.title = `${pitchName}（簡譜 ${p.degree}）`;
+
         const span = document.createElement("span");
-        span.textContent = p.degree;   // 數字實際上幾乎看不到，只是 Debug 方便
+        span.textContent = p.degree;   // 中間隱約看到簡譜數字
         pad.appendChild(span);
 
         pad.style.left = p.x + "%";
@@ -986,7 +1139,8 @@ const padLayout = [
         return;
       }
       const d = earQuestion[index];
-      playDegree(d, null);
+      // 聽寫題目用「中音」的音色
+      playDegree(d, null, "high1");
       setTimeout(() => playQuestionSequence(index + 1), 650);
     }
 
@@ -998,7 +1152,8 @@ const padLayout = [
       }
       earAnswer.push(digit);
       updateEarAnswerText();
-      playDegree(digit, null);
+      // 作答也用中音音色
+      playDegree(digit, null, "high1");
     }
 
     if (btnEarNew) {
@@ -1063,11 +1218,13 @@ const padLayout = [
       }
     }
 
-    // 建立兩個鼓面（放在所有函式定義後）
+    // 建立兩個鼓面
     createDrum("drum-play", (degree, octave, pad) => {
+      // 演奏器：照舌片實際 octave 播放
       playDegree(degree, pad, octave);
     });
     createDrum("drum-ear", (degree, octave, pad) => {
+      // 聽寫頁面的鼓面：只記作答，播放用中音
       addEarAnswer(degree);
     });
 
@@ -1079,7 +1236,8 @@ const padLayout = [
         if (currentPageId === "page-ear") {
           addEarAnswer(key);
         } else {
-          playDegree(key, null);
+          // 演奏器用中音音色（你也可以改成 high1 / low）
+          playDegree(key, null, "high1");
         }
       }
     });
@@ -1088,29 +1246,3 @@ const padLayout = [
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
