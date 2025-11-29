@@ -815,33 +815,36 @@
       }
     }
 
-  // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
-// x, y 為鼓面上的百分比座標（0~100），以「黃色點」為圓心的參考。
-// 中央低音 3 大約在圓心上方一點。
+ // ===== 鼓面點擊區：標準 D 調兩圈布局（對應紫色圖片） =====
+// x, y 為鼓面上的百分比座標（0~100），以 50,50 為圓心。
 const padLayout = [
   // 中央：最低音 3（單獨一塊）
   { id: "3_low_center", degree: "3", octave: "low",  ring: "center", x: 50.0, y: 45.0 },
 
   // 內圈：大圈（半徑約 3.7cm 對應）—— 高音1 度 / 低音
-  // ★ 這 7 個點整圈往上提約 3%（修正「太低」的問題）
-  { id: "1_high1_10", degree: "1", octave: "high1", ring: "inner", x: 75.2, y: 32.4 }, // 原 35.4
-  { id: "2_high1_57", degree: "2", octave: "high1", ring: "inner", x: 41.0, y: 19.3 }, // 原 22.3
-  { id: "3_high1_3",  degree: "3", octave: "high1", ring: "inner", x: 59.0, y: 19.3 }, // 原 22.3
+  { id: "1_high1_10", degree: "1", octave: "high1", ring: "inner", x: 75.2, y: 35.4 }, // 內圈大, 10分
 
-  { id: "4_low_30",   degree: "4", octave: "low",   ring: "inner", x: 50.0, y: 76.1 }, // 原 79.1
-  { id: "5_low_35",   degree: "5", octave: "low",   ring: "inner", x: 35.4, y: 72.2 }, // 原 75.2
-  { id: "6_low_20",   degree: "6", octave: "low",   ring: "inner", x: 75.2, y: 61.6 }, // 原 64.6
-  { id: "7_low_50",   degree: "7", octave: "low",   ring: "inner", x: 24.8, y: 32.4 }, // 原 35.4
+  // ⬇⬇ 內圈「2、3」：y 調成 32.1，2 向左移 5%，3 向右移 3% ⬇⬇
+  { id: "2_high1_57", degree: "2", octave: "high1", ring: "inner", x: 36.0, y: 32.1 }, // 由 41.0,22.3 改成 36.0,32.1
+  { id: "3_high1_3",  degree: "3", octave: "high1", ring: "inner", x: 62.0, y: 32.1 }, // 由 59.0,22.3 改成 62.0,32.1
+  // ⬆⬆ 只動這兩顆，其餘內圈低音維持原本位置 ⬆⬆
 
-  // 外圈：小圈（半徑約 4.8cm 對應）—— 你說「位置完全正確」，所以完全保留
-  { id: "1_high2_9",  degree: "1", octave: "high2", ring: "outer", x: 80.6, y: 27.8 }, // 外圈小, 9分
-  { id: "2_high2_56", degree: "2", octave: "high2", ring: "outer", x: 34.6, y: 15.5 }, // 外圈小, 56分
-  { id: "3_high2_60", degree: "3", octave: "high2", ring: "outer", x: 50.0, y: 12.2 }, // 外圈小, 60分
+  { id: "4_low_30",   degree: "4", octave: "low",   ring: "inner", x: 50.0, y: 79.1 }, // 內圈大, 30分
+  { id: "5_low_35",   degree: "5", octave: "low",   ring: "inner", x: 35.4, y: 75.2 }, // 內圈大, 35分
+  { id: "6_low_20",   degree: "6", octave: "low",   ring: "inner", x: 75.2, y: 64.6 }, // 內圈大, 20分
+  { id: "7_low_50",   degree: "7", octave: "low",   ring: "inner", x: 24.8, y: 35.4 }, // 內圈大, 50分
 
-  { id: "4_high1_26", degree: "4", octave: "high1", ring: "outer", x: 65.4, y: 84.5 }, // 外圈小, 26分
-  { id: "5_high1_34", degree: "5", octave: "high1", ring: "outer", x: 34.6, y: 84.5 }, // 外圈小, 34分
-  { id: "6_high1_15", degree: "6", octave: "high1", ring: "outer", x: 87.8, y: 50.0 }, // 外圈小, 15分
-  { id: "7_high1_44", degree: "7", octave: "high1", ring: "outer", x: 12.4, y: 54.0 }  // 外圈小, 44分
+  // ⚠ 外圈：請保留你原本那一版（你貼的 1_outer ~ 7_outer 那段）就好
+  // 這裡先示意寫上，如果你檔案裡已經是下列數值，就不用動：
+
+  { id: "1_outer", degree: "1", octave: "high2", ring: "outer", x: 49.0, y:  8.2 },
+  { id: "2_outer", degree: "2", octave: "high2", ring: "outer", x: 78.6, y: 22.8 },
+  { id: "3_outer", degree: "3", octave: "high2", ring: "outer", x: 88.0, y: 53.9 },
+
+  { id: "4_outer", degree: "4", octave: "high1", ring: "outer", x: 66.8, y: 80.6 },
+  { id: "5_outer", degree: "5", octave: "high1", ring: "outer", x: 33.0, y: 82.5 },
+  { id: "6_outer", degree: "6", octave: "high1", ring: "outer", x: 11.3, y: 54.4 },
+  { id: "7_outer", degree: "7", octave: "high1", ring: "outer", x: 20.6, y: 23.2 }
 ];
 
 
@@ -1043,6 +1046,7 @@ const padLayout = [
   </script>
 </body>
 </html>
+
 
 
 
